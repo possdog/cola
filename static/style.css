@@ -150,14 +150,15 @@ main {
 .slider-group:last-child { margin-bottom: 2px; }
 
 /* Hairline separating the Global panel's sub-sections (base sliders, tint,
-   level distribution). Full width like any rule, but with generous,
-   near-symmetric clearance on both sides (the slider-group above adds its
-   own 12px bottom margin): the empty space is what reads as a break — at
-   slider height with tight margins the line itself reads as a track. */
+   level distribution). The panel's normal rhythm is 12px between slider
+   groups (their own bottom margin), so this rule gets a symmetric 24px of
+   clearance on both sides — the slider-group above contributes its 12px,
+   the margins here add the rest. The gap is what reads as a break: at the
+   normal rhythm the line sits at slider height and reads as a track. */
 .panel hr.divider {
   border: none;
   border-top: 1px solid var(--border);
-  margin: 8px 0 12px;
+  margin: 12px 0 24px;
 }
 
 .slider-group .label { font-size: 13px; }
