@@ -614,8 +614,9 @@ async function resetPalette() {
 
 // ---- A/B slots ---------------------------------------------------------------
 
-// The A/B button compares two variants of the settings: clicking saves the
-// current state into the active slot, then loads the other slot. The slots
+// The A/B buttons compare two variants of the settings: the toggle saves the
+// current state into the active slot, then loads the other slot, and
+// copy-to-other overwrites the inactive slot without switching. The slots
 // hold full settings snapshots in the page only — the server keeps
 // persisting just the active palette — so a reload starts a fresh A and an
 // empty B.
@@ -627,6 +628,17 @@ const cloneState = (s) => JSON.parse(JSON.stringify(s));
 
 function setABButton() {
   $("#ab").textContent = `A/B: ${abActive}`;
+  $("#ab-copy").textContent = `${abActive} → ${abActive === "A" ? "B" : "A"}`;
+}
+
+// Copy-to-other overwrites the inactive slot with the active settings
+// without switching: a way to make both slots identical before diverging
+// one of them, or to discard the other variant. Nothing on screen changes,
+// so the toast is the only feedback.
+function copyAB() {
+  const other = abActive === "A" ? "B" : "A";
+  abSlots[other] = cloneState(state);
+  toast(`Copied ${abActive} to ${other}`);
 }
 
 async function swapAB() {
@@ -762,6 +774,7 @@ async function load() {
   abSlots.A = cloneState(state);
   setABButton();
   $("#ab").addEventListener("click", swapAB);
+  $("#ab-copy").addEventListener("click", copyAB);
   $("#reset").addEventListener("click", () => {
     if (!resetArmed) {
       armReset();

@@ -65,7 +65,10 @@ Click any swatch to copy its hex. The header buttons copy the whole palette
 as CSS custom properties (`--base-50: ...`) or JSON. **A/B** (next to the
 copy buttons) compares two variants of the settings: clicking it saves the
 current settings into the active slot and loads the other, so toggling
-flips between the two. Slots are page-local — the server keeps persisting
+flips between the two. **A → B / B → A** (the second button) copies the
+active slot's settings into the other without switching — useful for
+making both slots identical before diverging one, or for discarding the
+other variant. Slots are page-local — the server keeps persisting
 only the active palette — and switching to the still-empty slot seeds it
 with the current settings, so the first toggle changes nothing by itself.
 **Reset to defaults** restores the built-in palette (two clicks: the first
