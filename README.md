@@ -88,6 +88,14 @@ at the top, and only one filter can apply at a time.
 **Preview tabs** (above the preview area):
 
 - **Grid** — the swatch matrix, as before.
+- **Wheel** — a polar view of the palette: angle is each swatch's OKLCH hue
+  and radius is its level (50 at the rim, 950 at the center), so each
+  chromatic row reads as a spoke and hue coverage or gaps show at a glance.
+  The faint rings are the fixed-lightness levels — under the grayscale
+  filter each ring, like each grid column, should collapse to one uniform
+  gray. The near-neutral base row's hue is unconstrained, so it appears as a
+  legend ramp under the wheel instead of a misleading spoke. Click any dot
+  to copy its hex.
 - **Code** — a syntax-highlighted TypeScript sample in a mock editor. Token
   classes map to palette rows (keywords red-400, types cyan-400, functions
   blue-400, strings green-400, numbers orange-400, properties yellow-300,

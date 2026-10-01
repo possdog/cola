@@ -321,10 +321,42 @@ input[type="range"]::-moz-range-thumb {
   margin: 10px 2px 0;
 }
 
-/* ---- preview panes (Code / Notes / Branding) ---------------------------- */
+/* ---- preview panes (Wheel / Code / Notes / Branding) --------------------- */
 /* These mock app UIs are pure demo surfaces: app.js rebuilds their innerHTML
    with inline palette colors on every update, so structure lives in JS and
    only layout/typography lives here. */
+
+/* Color wheel (Wheel tab). Only layout/typography lives here; app.js
+   positions every dot from the server-provided OKLCH hue and level. */
+#wheel-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 8px;
+}
+/* preserveAspectRatio keeps the 1000x1000 viewBox letterboxed inside whatever
+   box the pane gives it, so the wheel is always a circle. */
+.wheel-svg { flex: 1; min-height: 0; width: 100%; }
+.wheel-ring { fill: none; stroke: var(--border); stroke-width: 1; opacity: 0.55; }
+.wheel-label { fill: var(--text-dim); font-size: 16px; text-anchor: middle; }
+.wheel-dot { cursor: pointer; }
+.wheel-dot:hover { stroke: var(--text); stroke-width: 2.5; }
+.wheel-legend { display: flex; align-items: center; gap: 3px; }
+.wheel-legend .legend-name {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-right: 5px;
+}
+.legend-swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.legend-swatch:hover { outline: 2px solid var(--text); outline-offset: 1px; }
+.wheel-hint { color: var(--text-dim); font-size: 12px; margin: 0; }
 
 /* Editor window (Code tab) */
 #code-preview { display: flex; flex-direction: column; }

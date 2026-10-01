@@ -6,7 +6,8 @@ let palette = null;
 // view is what gets displayed: the filtered palette when a view filter is
 // active, otherwise the real palette. Exports and copies always use palette.
 let view = null;
-// Active preview tab (grid / code / notes / branding). Grid is the default.
+// Active preview tab (grid / wheel / code / notes / branding). Grid is the
+// default.
 let activeTab = "grid";
 // Active view filter, or null when "Off" is selected (server-side: grayscale
 // is exact Oklab, CVD uses Machado 2009 matrices). The panel is a radio
@@ -112,6 +113,7 @@ function esc(s) {
 
 const TAB_PANES = {
   grid: "#grid-wrap",
+  wheel: "#wheel-preview",
   code: "#code-preview",
   notes: "#notes-preview",
   branding: "#branding-preview",
@@ -121,7 +123,8 @@ function renderActive() {
   // The grid is always patched (in-place, cheap) so row/sidebar dots stay in
   // sync even while another tab is showing; then the visible pane is drawn.
   renderGrid();
-  if (activeTab === "code") renderCode();
+  if (activeTab === "wheel") renderWheel();
+  else if (activeTab === "code") renderCode();
   else if (activeTab === "notes") renderNotes();
   else if (activeTab === "branding") renderBranding();
 }
@@ -240,6 +243,67 @@ function renderNotes() {
         <blockquote style="border-left-color:${hexOf("cyan", 500)};background:${hexOf("base", 100)}">Ship the ramp when every column collapses to one gray.</blockquote>
       </div>
     </div>`;
+}
+
+// ---- Wheel preview ---------------------------------------------------------
+
+// A polar view of the palette: angle is each swatch's OKLCH hue and radius is
+// its level (50 at the rim, 950 at the center), so each chromatic row reads
+// as a spoke and hue coverage — or a gap — shows at a glance. This is
+// geometry only; the frontend still computes no colors, it just plots the
+// h/l/c values the API already returns (the same ones the grid tooltips use).
+function renderWheel() {
+  // Pair display (view) and real columns by index, like renderGrid does.
+  const pairs = view.colors.map((vcol, i) => ({ vcol, col: palette.colors[i] }));
+  // The near-neutral base row's hue is unconstrained, so a wheel angle for it
+  // would be arbitrary; it renders as a legend ramp below the wheel instead
+  // of a misleading spoke.
+  const spokes = pairs.filter((p) => p.vcol.name !== "base");
+  const base = pairs.find((p) => p.vcol.name === "base");
+  const n = palette.levels.length;
+  const R_OUT = 470, R_IN = 78, DOT = 14;
+  const radius = (j) => R_OUT - (j * (R_OUT - R_IN)) / (n - 1);
+  // Hue 0 sits at 12 o'clock, increasing clockwise — the same sweep direction
+  // as the hue sliders' painted tracks.
+  const pos = (r, hue) => {
+    const a = (hue * Math.PI) / 180;
+    return { x: 500 + r * Math.sin(a), y: 500 - r * Math.cos(a) };
+  };
+  // One faint ring per level: a ring is one fixed Oklab lightness, so under
+  // the grayscale filter each ring should collapse to one uniform gray —
+  // the same check the grid's columns provide.
+  const rings = palette.levels
+    .map((_, j) => `<circle class="wheel-ring" cx="500" cy="500" r="${radius(j).toFixed(1)}"></circle>`)
+    .join("");
+  // Ring labels at the three anchor levels; the top axis is hue 0, which no
+  // default hue window actually covers, so the labels never collide with
+  // dots.
+  const labels = [0, 6, 12]
+    .map((j) => `<text class="wheel-label" x="500" y="${(500 - radius(j) - 8).toFixed(1)}">${palette.levels[j]}</text>`)
+    .join("");
+  const dots = spokes
+    .flatMap(({ vcol, col }) =>
+      vcol.swatches.map((s, j) => {
+        const real = col.swatches[j];
+        const { x, y } = pos(radius(j), s.h);
+        return `<circle class="wheel-dot" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${DOT}" fill="${s.hex}" data-hex="${real.hex}"><title>${titleFor(col, real)}</title></circle>`;
+      })
+    )
+    .join("");
+  const baseRamp = base
+    ? `<div class="wheel-legend"><span class="legend-name">${esc(base.col.name)}</span>${base.vcol.swatches
+        .map((s, j) => {
+          const real = base.col.swatches[j];
+          return `<span class="legend-swatch" style="background:${s.hex}" data-hex="${real.hex}" title="${titleFor(base.col, real)}"></span>`;
+        })
+        .join("")}</div>`
+    : "";
+  $("#wheel-preview").innerHTML = `
+    <svg class="wheel-svg" viewBox="0 0 1000 1000" role="img" aria-label="Palette color wheel">
+      ${rings}${labels}${dots}
+    </svg>
+    ${baseRamp}
+    <p class="wheel-hint">Angle is OKLCH hue; radius is level (50 at the rim, 950 at the center). Click any swatch to copy its hex.</p>`;
 }
 
 // ---- Branding preview ------------------------------------------------------
@@ -517,8 +581,8 @@ async function load() {
   renderActive();
   applyTheme(data.theme);
 
-  // Preview tabs: the four panes share the palette fetching pipeline; a tab
-  // click just swaps visibility and redraws the newly shown pane.
+  // Preview tabs: the panes share the palette fetching pipeline; a tab click
+  // just swaps visibility and redraws the newly shown pane.
   document.querySelectorAll("#tabs .tab").forEach((b) => {
     b.addEventListener("click", () => setTab(b.dataset.tab));
   });
@@ -557,6 +621,12 @@ async function load() {
   $("#grid").addEventListener("click", (e) => {
     const cell = e.target.closest(".swatch");
     if (cell) copyText(cell.dataset.hex, `Copied ${cell.dataset.hex}`);
+  });
+  // Same copy affordance as the grid, for the wheel's SVG dots and the base
+  // legend ramp (both carry data-hex). closest() works on SVG elements too.
+  $("#wheel-preview").addEventListener("click", (e) => {
+    const swatch = e.target.closest(".wheel-dot, .legend-swatch");
+    if (swatch) copyText(swatch.dataset.hex, `Copied ${swatch.dataset.hex}`);
   });
   $("#copy-css").addEventListener("click", () => copyText(paletteToCSS(), "CSS variables copied"));
   $("#copy-json").addEventListener("click", () => copyText(paletteToJSON(), "JSON copied"));
