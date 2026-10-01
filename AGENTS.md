@@ -33,6 +33,9 @@ tls.go                      self-signed localhost certificate generation
 internal/color              Oklab/OKLCH <-> sRGB, gamut fitting
 internal/palette            state model, palette generation, view filters, theme
 static/                     UI (vanilla JS/CSS, no build step, embedded via go:embed)
+static/js/                  ES modules: app.js (entry + wiring), store.js (shared
+                            mutable state), one module per concern; one file per
+                            preview tab under static/js/preview/
 ```
 
 ## Conventions
@@ -44,7 +47,8 @@ static/                     UI (vanilla JS/CSS, no build step, embedded via go:e
   are never persisted.
 - Dogfooding: every API response carries a `theme` derived from the current
   palette; the UI is styled from it live. When changing response shapes,
-  check `static/app.js` consumers.
+  check `static/js/` consumers (swatch.js and the preview modules read the
+  response most closely).
 - Go doc comments in this codebase explain the *why* behind non-obvious
   logic (see `persist.go`, `main.go` for the house style). Match it.
 - New handlers get tests in `handler_test.go`; test the JSON contract, not

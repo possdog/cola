@@ -266,4 +266,10 @@ main.go                    HTTP server; embeds static/
 internal/color/oklab.go    Oklab/OKLCH <-> sRGB, hex output, gamut fitting
 internal/palette/          State model and palette generation
 static/                    UI (no build step, no dependencies)
+static/js/                 UI logic as ES modules: app.js is the entry point
+                           (load + event wiring), store.js holds the shared
+                           mutable state, and each concern — grid, tabs,
+                           theme, controls, API calls, A/B slots, exports —
+                           has its own module, with one file per preview tab
+                           under static/js/preview/
 ```
