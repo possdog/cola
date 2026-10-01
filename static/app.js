@@ -627,7 +627,13 @@ const abSlots = { A: null, B: null };
 const cloneState = (s) => JSON.parse(JSON.stringify(s));
 
 function setABButton() {
-  $("#ab").textContent = `A/B: ${abActive}`;
+  // The segmented control marks the active half; the copy button's label
+  // shows the copy direction.
+  for (const slot of ["A", "B"]) {
+    const seg = $(`#ab-${slot.toLowerCase()}`);
+    seg.classList.toggle("active", abActive === slot);
+    seg.setAttribute("aria-pressed", abActive === slot);
+  }
   $("#ab-copy").textContent = `${abActive} → ${abActive === "A" ? "B" : "A"}`;
 }
 
@@ -773,7 +779,12 @@ async function load() {
   // first toggle seeds it.
   abSlots.A = cloneState(state);
   setABButton();
-  $("#ab").addEventListener("click", swapAB);
+  // Segmented A/B: clicking the inactive half swaps slots; clicking the
+  // active half is a no-op.
+  $("#ab").addEventListener("click", (e) => {
+    const seg = e.target.closest(".seg");
+    if (seg && seg.dataset.slot !== abActive) swapAB();
+  });
   $("#ab-copy").addEventListener("click", copyAB);
   $("#reset").addEventListener("click", () => {
     if (!resetArmed) {
