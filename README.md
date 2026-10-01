@@ -84,6 +84,11 @@ curl --cacert certs/localhost.crt https://127.0.0.1:8443/api/palette
   is pink, and sRGB red sits at ~30°.) The near-neutral base row is
   unconstrained.
 
+Double-click any of these sliders to snap just that one back to its default
+value — the same value **Reset to defaults** would restore for it, without
+touching anything else. (The blue-light intensity slider is not part of the
+palette state and has no default to restore.)
+
 Click any swatch to copy its hex. The header buttons copy the whole palette
 as CSS custom properties (`--base-50: ...`) or JSON. **A/B** (next to the
 copy buttons) is a three-segment A | → | B control for comparing two
@@ -175,7 +180,9 @@ under blue light.
 ## HTTP API
 
 - `GET /api/palette` — the current state (loaded at startup and updated by
-  every `POST`) plus the generated palette.
+  every `POST`) plus the generated palette. Every response also carries
+  `defaults`: the built-in default state (the one `POST /api/reset`
+  restores), so the UI can reset a single slider client-side.
 - `POST /api/palette` — JSON state body plus optional `filters` array
   (`grayscale`, `protanopia`, `deuteranopia`, `tritanopia`, `bluelight`) and
   optional `blueLight` intensity in `[0,1]` (only applies while `bluelight`

@@ -63,6 +63,10 @@ type paletteResponse struct {
 	// being designed. When view filters are active it is derived from the
 	// filtered copy so the UI itself displays the filtered appearance.
 	Theme *palette.Theme `json:"theme,omitempty"`
+	// Defaults is the built-in default state, the same one /api/reset
+	// restores. The UI carries it so a double-click on any slider can snap
+	// just that one value back to its default without a reset round trip.
+	Defaults palette.State `json:"defaults"`
 }
 
 func writeJSON(w http.ResponseWriter, v any) {
@@ -147,7 +151,7 @@ func (s *server) updateAB(req paletteRequest, active palette.State) abState {
 // the A/B record) as the API payload shared by the palette and reset
 // handlers.
 func buildResponse(st palette.State, ab abState, filterNames []string, opts palette.FilterOptions) paletteResponse {
-	resp := paletteResponse{State: st, AB: ab, Palette: palette.Generate(st)}
+	resp := paletteResponse{State: st, AB: ab, Palette: palette.Generate(st), Defaults: palette.DefaultState().Normalized()}
 	// Only recognized filters produce a filtered copy; unknown names in the
 	// list are dropped rather than erroring.
 	if active := slices.DeleteFunc(slices.Clone(filterNames), func(f string) bool { return !palette.IsFilter(f) }); len(active) > 0 {

@@ -17,6 +17,10 @@ let filter = null;
 // Blue light filter intensity in [0,1]. A display-only preference: it rides
 // along with every request but is never part of the exported palette state.
 let blueLight = 0;
+// Built-in default state, delivered with every palette response (it is the
+// same state POST /api/reset restores). Double-clicking a slider snaps just
+// that one value back to its default from here, without a reset round trip.
+let defaults = null;
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -632,6 +636,16 @@ function bindSlider(id, key, digits) {
     val.textContent = fmt(input.value, digits);
     update();
   });
+  // Double-click snaps the slider back to the default Reset to defaults
+  // would restore for this field. sync() moves the thumb and the label;
+  // update() regenerates exactly like a manual move, so the change
+  // persists and rides with the A/B snapshots like any drag.
+  input.addEventListener("dblclick", () => {
+    if (!defaults) return;
+    state[key] = defaults[key];
+    sync();
+    update();
+  });
 }
 
 // Sidebar identity dots per color name, kept in sync with the grid in
@@ -642,7 +656,11 @@ function buildColorControls() {
   const wrap = $("#color-controls");
   wrap.innerHTML = "";
   colorDots.clear();
-  state.colors.forEach((c) => {
+  state.colors.forEach((c, i) => {
+    // Per-row defaults, looked up by index: rows are positional everywhere
+    // else (a full reset replaces them wholesale), so a rename can't
+    // orphan the lookup.
+    const def = defaults && defaults.colors[i];
     // The server defines each color's allowed hue window (hueMin/hueMax);
     // the slider bounds come straight from it so UI and API can't disagree.
     const hMin = c.hueMin ?? 0;
@@ -677,9 +695,27 @@ function buildColorControls() {
       hueVal.textContent = `${hueIn.value}°`;
       update();
     });
+    // Double-click snaps the hue to its default, the same value Reset to
+    // defaults would restore for this row. The state gets the exact
+    // default even when the thumb snaps to the step grid on screen —
+    // matching what a full reset leaves behind.
+    hueIn.addEventListener("dblclick", () => {
+      if (!def) return;
+      c.hue = def.hue;
+      hueIn.value = c.hue;
+      hueVal.textContent = `${Math.round(c.hue)}°`;
+      update();
+    });
     chromaIn.addEventListener("input", () => {
       c.chroma = Number(chromaIn.value);
       chromaVal.textContent = fmt(chromaIn.value);
+      update();
+    });
+    chromaIn.addEventListener("dblclick", () => {
+      if (!def) return;
+      c.chroma = def.chroma;
+      chromaIn.value = c.chroma;
+      chromaVal.textContent = fmt(c.chroma);
       update();
     });
     colorDots.set(c.name, row.querySelector(".color-dot"));
@@ -902,6 +938,7 @@ async function load() {
   state = data.state;
   palette = data.palette;
   view = data.filtered || data.palette;
+  defaults = data.defaults;
 
   bindSlider("maxL", "maxL", 3);
   bindSlider("minL", "minL", 3);

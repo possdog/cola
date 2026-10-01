@@ -276,6 +276,31 @@ func doReset(t *testing.T, s *server, body string) paletteResponse {
 	return resp
 }
 
+// TestDefaultsInResponse pins the `defaults` JSON contract: every palette
+// response carries the built-in default state (the one /api/reset restores)
+// so the UI can snap a single slider to its default without resetting the
+// whole palette. The value is a constant — a custom POST that becomes the
+// stored base must not bleed into it.
+func TestDefaultsInResponse(t *testing.T) {
+	s, _ := newTestServer(t)
+	want, err := json.Marshal(palette.DefaultState().Normalized())
+	if err != nil {
+		t.Fatalf("marshal default state: %v", err)
+	}
+	check := func(name string, resp paletteResponse) {
+		got, err := json.Marshal(resp.Defaults)
+		if err != nil {
+			t.Fatalf("marshal response defaults: %v", err)
+		}
+		if string(got) != string(want) {
+			t.Errorf("%s response defaults = %s, want %s", name, got, want)
+		}
+	}
+	check("GET", doPalette(t, s, http.MethodGet, ""))
+	check("POST", postPalette(t, s, `{"saturation":1.5}`))
+	check("reset", doReset(t, s, ""))
+}
+
 func TestThemeInResponse(t *testing.T) {
 	s, _ := newTestServer(t)
 	resp := doPalette(t, s, http.MethodGet, "")
