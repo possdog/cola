@@ -65,6 +65,18 @@ curl --cacert certs/localhost.crt https://127.0.0.1:8443/api/palette
   shades spread across a wider range — and negative bend does the opposite.
   Levels 50 and 950 are fixed points of the power law, so the anchors never
   move, and the skew can never invert the ramp's lightness order.
+- **Pinch** — bunches the (already bent) steps around one point, centered at
+  0 (no pinch). Each side of that point is remapped with the exponent
+  (1+f)/(1-f), so both directions feel symmetric in strength: positive
+  values concentrate the steps near the point (+1 collapses the whole ramp
+  onto it, anchors included) and negative values push them toward the
+  anchors (-1 flattens every level onto the nearer edge). For any pinch
+  below 1 in magnitude the mapping is strictly monotonic, so the lightness
+  order can never invert.
+- **Pitch center** — where the pinch focuses, as a position between the
+  anchors (0 = level 50, 1 = level 950; default 0.5). It has no effect while
+  pinch is 0. The pinch runs after the bend, so the pitch center names a spot
+  in the final distribution: the step at that spot stays exactly there.
 - **Saturation** — global chroma multiplier.
 - **Per-color hue and chroma** — precise OKLCH values for each of the nine
   rows. Each chromatic color's hue is limited to ±30° around its ideal OKLCH
@@ -197,6 +209,8 @@ State shape:
   "maxL": 0.985,
   "saturation": 1,
   "bend": 0,
+  "pinch": 0,
+  "pitchCenter": 0.5,
   "colors": [
     { "name": "base", "hue": 90, "chroma": 0.006 },
     { "name": "red", "hue": 30, "chroma": 0.16 }
@@ -213,7 +227,7 @@ endpoints don't look oversaturated).
 
 ```json
 {
-  "state": { "minL": 0.17, "maxL": 0.985, "saturation": 1, "bend": 0, "colors": [] },
+  "state": { "minL": 0.17, "maxL": 0.985, "saturation": 1, "bend": 0, "pinch": 0, "pitchCenter": 0.5, "colors": [] },
   "ab": { "active": "A", "slots": { "A": { "…": "the state shape above" }, "B": null } }
 }
 ```

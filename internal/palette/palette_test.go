@@ -115,6 +115,124 @@ func TestNormalizedClamps(t *testing.T) {
 	if n2 := s.Normalized(); n2.Bend != -1 {
 		t.Errorf("negative bend not clamped: %v", n2.Bend)
 	}
+	s.Pinch = 9
+	s.PitchCenter = -3
+	n3 := s.Normalized()
+	if n3.Pinch != 1 {
+		t.Errorf("pinch not clamped: %v", n3.Pinch)
+	}
+	if n3.PitchCenter != 0 {
+		t.Errorf("pitch center not clamped: %v", n3.PitchCenter)
+	}
+	s.Pinch = -9
+	s.PitchCenter = 3
+	n4 := s.Normalized()
+	if n4.Pinch != -1 {
+		t.Errorf("negative pinch not clamped: %v", n4.Pinch)
+	}
+	if n4.PitchCenter != 1 {
+		t.Errorf("pitch center not clamped from above: %v", n4.PitchCenter)
+	}
+}
+
+// TestPinchAt pins the ported pinch math against hand-computed cases,
+// including the degenerate extremes the guards short-circuit.
+func TestPinchAt(t *testing.T) {
+	cases := []struct {
+		v, f, c, want float64
+	}{
+		// f = 0 is the identity for any center.
+		{0.25, 0, 0.5, 0.25},
+		{0.25, 0, 0.8, 0.25},
+		// v = c is a fixed point.
+		{0.5, 0.75, 0.5, 0.5},
+		// f = 1 collapses everything onto the center.
+		{0.25, 1, 0.7, 0.7},
+		{0.9, 1, 0.7, 0.7},
+		// f = -1 flattens interior values onto the nearer edge.
+		{0.25, -1, 0.5, 0},
+		{0.75, -1, 0.5, 1},
+		{0.2, -1, 0.3, 0},
+		{0.5, -1, 0.3, 1},
+		// Symmetric center: k = 3, so 0.25 -> 0.5 - 0.5^3 * 0.5.
+		{0.25, 0.5, 0.5, 0.4375},
+		{0.75, 0.5, 0.5, 0.5625},
+		// Center pinned at an edge: each side normalizes to the full span
+		// (k = 3, so 0.3^3 and 1 - 0.7^3).
+		{0.3, 0.5, 0, 0.027},
+		{0.3, 0.5, 1, 0.657},
+	}
+	for _, tc := range cases {
+		if got := pinchAt(tc.v, tc.f, tc.c); math.Abs(got-tc.want) > 1e-12 {
+			t.Errorf("pinchAt(%v, %v, %v) = %v, want %v", tc.v, tc.f, tc.c, got, tc.want)
+		}
+	}
+}
+
+// TestGeneratePinch checks the pinch's contract through Generate: anchors
+// never move, positive pinch pulls every interior level toward the pitch
+// center and negative pinch pushes them away, pinch 0 is the exact identity
+// regardless of the center, and full pinch collapses the interior onto the
+// center's lightness.
+func TestGeneratePinch(t *testing.T) {
+	flat := Generate(DefaultState())
+	s := DefaultState()
+
+	// Pinch 0 with any pitch center reproduces the default palette exactly.
+	s.PitchCenter = 0.8
+	if got := Generate(s); got.Colors[0].Swatches[3].L != flat.Colors[0].Swatches[3].L {
+		t.Error("pinch 0 with a moved pitch center changed the palette")
+	}
+
+	// Positive pinch concentrates the interior around the center; negative
+	// spreads it toward the anchors. Compare distances to the center's
+	// lightness rather than raw L, since levels on opposite sides move in
+	// opposite directions.
+	s.PitchCenter = 0.5
+	s.Pinch = 0.5
+	up := Generate(s)
+	s.Pinch = -0.5
+	down := Generate(s)
+	def := DefaultState()
+	centerL := def.MaxL - 0.5*(def.MaxL-def.MinL)
+	last := len(flat.Levels) - 1
+	for i, row := range flat.Colors {
+		for j, sw := range row.Swatches {
+			if j == 0 || j == last {
+				for _, bent := range []Palette{up, down} {
+					if bent.Colors[i].Swatches[j].L != sw.L {
+						t.Errorf("%s level %d anchor moved under pinch", row.Name, sw.Level)
+					}
+				}
+				continue
+			}
+			for name, bent := range map[string]Palette{"positive": up, "negative": down} {
+				got := bent.Colors[i].Swatches[j].L
+				gotDist, wantDist := math.Abs(got-centerL), math.Abs(sw.L-centerL)
+				if name == "positive" && gotDist >= wantDist {
+					t.Errorf("%s level %d: positive pinch distance %v not below flat %v",
+						row.Name, sw.Level, gotDist, wantDist)
+				}
+				if name == "negative" && gotDist <= wantDist {
+					t.Errorf("%s level %d: negative pinch distance %v not above flat %v",
+						row.Name, sw.Level, gotDist, wantDist)
+				}
+			}
+		}
+	}
+
+	// Full pinch collapses every interior level onto the center's
+	// lightness — the whole ramp becomes the two anchors plus one step.
+	s.Pinch = 1
+	collapsed := Generate(s)
+	for _, row := range collapsed.Colors {
+		for j := 1; j < last; j++ {
+			if got := row.Swatches[j].L; math.Abs(got-centerL) > 1e-9 {
+				t.Errorf("%s level %d: full pinch L %v, want center L %v",
+					row.Name, row.Swatches[j].Level, got, centerL)
+			}
+		}
+	}
 }
 
 // TestGenerateBend checks the power-law skew's contract: the anchors never

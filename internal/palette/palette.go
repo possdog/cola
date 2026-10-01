@@ -80,8 +80,16 @@ type State struct {
 	// spacing, +1 bunches the intermediate steps toward the light end
 	// (finer dark shades), and -1 bunches them toward the dark end (finer
 	// light shades). See bendT.
-	Bend   float64     `json:"bend"`
-	Colors []ColorSpec `json:"colors"`
+	Bend float64 `json:"bend"`
+	// Pinch and PitchCenter reshape the (already bent) distribution
+	// around one point: Pinch concentrates the steps near that point
+	// (+1 collapses them onto it) or, when negative, pushes them toward
+	// the anchors (-1 flattens every interior level onto the nearer
+	// edge). PitchCenter is the point's position between the anchors
+	// (0 = level 50, 1 = level 950). See pinchAt.
+	Pinch       float64     `json:"pinch"`
+	PitchCenter float64     `json:"pitchCenter"`
+	Colors      []ColorSpec `json:"colors"`
 }
 
 // Swatch is one computed color in the grid.
@@ -119,7 +127,11 @@ func DefaultState() State {
 		Saturation: 1,
 		// Bend is the power-law skew of the luminosity distribution; 0 is
 		// the default, so the default palette keeps the Flexoki spacing.
-		Bend: 0,
+		// Pinch/PitchCenter likewise default to their identity (0 pinch;
+		// the pitch center itself only matters once pinch departs from 0).
+		Bend:        0,
+		Pinch:       0,
+		PitchCenter: 0.5,
 		Colors: []ColorSpec{
 			{Name: "base", Hue: 90, Chroma: 0.006},
 			{Name: "red", Hue: 30, Chroma: 0.16},
@@ -147,6 +159,8 @@ func (s State) Normalized() State {
 	}
 	out.Saturation = clamp(s.Saturation, 0, 3)
 	out.Bend = clamp(s.Bend, -1, 1)
+	out.Pinch = clamp(s.Pinch, -1, 1)
+	out.PitchCenter = clamp(s.PitchCenter, 0, 1)
 	// Copy the color slice before clamping in place: ColorSpec holds only
 	// scalars, so a slice copy is a full deep copy. Without it, the writes
 	// below would mutate the caller's backing array — and anything aliasing
@@ -195,6 +209,61 @@ func bendT(t, bend float64) float64 {
 	return math.Pow(t, math.Exp2(bend))
 }
 
+// pinchAt reshapes a position v in [0,1] around a center point c: pinch f
+// concentrates values near c (f = 1 collapses everything onto it) or, when
+// negative, pushes them toward the edges (f = -1 flattens every interior
+// value onto the nearer of 0 and 1). f = 0 is the identity for any c. Each
+// side of c is normalized to its own [0,1] span first, so the curve is
+// symmetric in strength even when c sits off the middle; a center pinned at
+// an edge degenerates to the constant c. For |f| < 1 the mapping fixes 0, c,
+// and 1 and is strictly monotonic, so the ramp's lightness order can never
+// invert; at the clamped extremes it degenerates instead (f = 1 collapses
+// everything onto c, anchors included; f = -1 flattens everything onto the
+// nearer edge). Ported from the reference TypeScript implementation.
+func pinchAt(v, f, c float64) float64 {
+	// Short-circuit the identity, like bendT: the general path below is
+	// algebraically v but not bit-identical to it, and a zero pinch must
+	// leave the default palette untouched exactly.
+	if f == 0 {
+		return v
+	}
+	e := v - c
+	if e == 0 {
+		return c
+	}
+	m := 1 - c
+	if e < 0 {
+		m = c
+	}
+	if m == 0 {
+		return c
+	}
+	if f >= 1 {
+		return c
+	}
+	if f <= -1 {
+		if e < 0 {
+			return 0
+		}
+		return 1
+	}
+	k := (1 + f) / (1 - f)
+	sign := 1.0
+	if e < 0 {
+		sign = -1
+	}
+	return c + sign*math.Pow(math.Abs(e)/m, k)*m
+}
+
+// levelT maps a level's base position t (the Flexoki spacing) to its final
+// position between the anchors: the power-law bend first, then the pinch
+// around the pitch center. Pinch runs last so PitchCenter names a position
+// in the final distribution — the level at that spot stays exactly there —
+// and both stages fix 0 and 1, so the anchors are never moved by either.
+func levelT(t float64, s State) float64 {
+	return pinchAt(bendT(t, s.Bend), s.Pinch, s.PitchCenter)
+}
+
 // Generate computes every swatch of the palette for the given state.
 func Generate(s State) Palette {
 	s = s.Normalized()
@@ -203,7 +272,7 @@ func Generate(s State) Palette {
 		hue := cs.Hue
 		row := ColorResult{Name: cs.Name, Hue: hue}
 		for i, level := range Levels {
-			L := s.MaxL - bendT(lightT[i], s.Bend)*(s.MaxL-s.MinL)
+			L := s.MaxL - levelT(lightT[i], s)*(s.MaxL-s.MinL)
 			C := color.FitChroma(L, hue, cs.Chroma*s.Saturation*taper(L))
 			lab := color.LCh{L: L, C: C, H: hue}.ToLab()
 			row.Swatches = append(row.Swatches, Swatch{
