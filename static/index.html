@@ -49,6 +49,10 @@
           <input type="range" id="saturation" min="0" max="2" step="0.05">
           <span class="val" id="saturation-val"></span>
         </label>
+        <!-- Dividers split Global into its three sub-sections: the base
+             palette sliders, the tint block, and the level-distribution
+             controls (bend, pinch). -->
+        <hr class="divider">
         <!-- The tint mixes one fixed color into every swatch: hue,
              luminosity, and chroma pick the color; intensity how strongly
              it blends in (0 = off). The hue track is a static full-spectrum
@@ -76,6 +80,7 @@
           <input type="range" id="tintIntensity" min="0" max="0.25" step="0.01" value="0">
           <span class="val" id="tintIntensity-val"></span>
         </label>
+        <hr class="divider">
         <label class="slider-group">
           <span class="label">Bend <em class="hint">(power-law lightness skew)</em></span>
           <input type="range" id="bend" min="-1" max="1" step="0.05" value="0">

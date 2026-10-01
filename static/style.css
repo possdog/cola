@@ -149,6 +149,16 @@ main {
 }
 .slider-group:last-child { margin-bottom: 2px; }
 
+/* Hairline separating the Global panel's sub-sections (base sliders, tint,
+   level distribution). The 1px top border matches the other rules in the
+   app; margins only add space below, since the slider-group above already
+   contributes its own bottom margin. */
+.panel hr.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2px 0 10px;
+}
+
 .slider-group .label { font-size: 13px; }
 .slider-group .hint { font-style: normal; color: var(--text-dim); font-size: 12px; }
 .slider-group .val {
