@@ -63,8 +63,10 @@ function card(fg, bg, { large = false, label, sample, pairText }) {
       <div class="contrast-meta">
         <span class="contrast-label">${label}</span>
         <span class="contrast-pair">${pairText}</span>
-        <span class="contrast-ratio">${ratio.toFixed(2)}:1 / ${threshold}:1</span>
-        <span class="contrast-badge" style="background:${chip.hex};color:${swatchText(chip)}">${pass ? "PASS" : "FAIL"}</span>
+        <span class="contrast-score">
+          <span class="contrast-ratio">${ratio.toFixed(2)}:1 / ${threshold}:1</span>
+          <span class="contrast-badge" style="background:${chip.hex};color:${swatchText(chip)}">${pass ? "PASS" : "FAIL"}</span>
+        </span>
       </div>
     </div>`;
 }

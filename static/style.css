@@ -1454,10 +1454,18 @@ input[type="range"]::-moz-range-thumb {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 10.5px;
 }
-.contrast-ratio {
+/* Ratio and badge move as one unit: wrapping never splits them, so the pair
+   name's length can change whether the unit sits on its line but never the
+   ratio/badge order or the unit's right alignment. */
+.contrast-score {
   margin-left: auto;
-  font-variant-numeric: tabular-nums;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   white-space: nowrap;
+}
+.contrast-ratio {
+  font-variant-numeric: tabular-nums;
 }
 .contrast-badge {
   font-weight: 700;
