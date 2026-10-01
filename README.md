@@ -163,6 +163,22 @@ at the top, and only one filter can apply at a time.
   that is never persisted. Geometry only, as everywhere in the UI: dots are
   positioned from the l/c/h values the API already returns and painted with
   the response hexes.
+- **Contrast** — a WCAG AA report on realistic foreground/background
+  combinations, in two groups. *Interface pairings* are the combos a UI built
+  on the palette actually makes: body, heading, secondary, and disabled text
+  in light and dark UIs, accent links in both modes, a button label on
+  blue-600, a destructive label on red-600, and success/warning badge text.
+  *Ramp pairings* are the two standard pairs every chromatic ramp must
+  support: level-800 ink on its level-100 tint, and its 400 step on base-950.
+  Each card renders the real ground and ink at the size class the AA tier
+  assumes (body vs large text) and shows the contrast ratio plus a PASS/FAIL
+  chip — 4.5:1 for body text, 3:1 for large text. The ratios are plain
+  arithmetic on the server-provided WCAG luminance each swatch already
+  carries (no color math in the browser), and since the pane reads the
+  filtered view, contrast can be re-checked under the grayscale, CVD, and
+  blue-light filters. The PASS/FAIL chips themselves use the green and red
+  ramps with luminance-picked ink, so the report scores the palette with the
+  palette.
 - **Code** — a syntax-highlighted TypeScript sample shown in three programming
   environments, toggled at the top of the pane (a display-only preference,
   never persisted):

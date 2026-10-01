@@ -1397,6 +1397,76 @@ input[type="range"]::-moz-range-thumb {
   letter-spacing: 0.5px;
 }
 
+/* Contrast report (Contrast tab). Like the other mock panes this is a demo
+   surface rebuilt by app.js; only layout/typography lives here. Grounds and
+   ink are inline hexes from contrast.js, and the PASS/FAIL chips are palette
+   rows (green/red) with luminance-picked ink, so the report scores the
+   palette with the palette. */
+.contrast-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 4px 2px 16px;
+}
+.contrast-sec h3 { margin: 0 0 2px; font-size: 14px; color: var(--text); }
+.contrast-sec > p {
+  margin: 0 0 10px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.contrast-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+}
+.contrast-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+/* The stage is the demo surface itself: the real ground with the real ink,
+   at the size class the AA tier assumes (body vs large text). */
+.contrast-stage {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 14px;
+}
+.contrast-sample { font-size: 13.5px; }
+.contrast-sample.lg { font-size: 21px; font-weight: 700; }
+.contrast-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 7px;
+  padding: 7px 10px;
+  font-size: 11.5px;
+  color: var(--text-dim);
+}
+/* The label takes the first line alone; pair, ratio, and badge share the
+   second, with the ratio pushed to the right end. */
+.contrast-label { flex: 1 1 100%; color: var(--text); }
+.contrast-pair {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10.5px;
+}
+.contrast-ratio {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.contrast-badge {
+  font-weight: 700;
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
 #toast {
   position: fixed;
   bottom: 24px;

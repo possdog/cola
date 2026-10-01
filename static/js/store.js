@@ -20,8 +20,8 @@
 // - blueLight is the blue light filter intensity in [0,1]. A display-only
 //   preference: it rides along with every request but is never part of the
 //   exported palette state.
-// - activeTab is the active preview tab (grid / wheel / gamut / code / notes /
-//   landing / design). Grid is the default.
+// - activeTab is the active preview tab (grid / wheel / gamut / contrast /
+//   code / notes / landing / design). Grid is the default.
 // - abActive / abSlots are the A/B comparison record (see ab.js).
 
 export const store = {
