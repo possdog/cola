@@ -53,6 +53,9 @@ export function renderDesign() {
   // the three chromatic notes a spread leans on.
   // bars alternate between the 200 and 300 tints so a paragraph reads as
   // having highlight lines rather than one flat gray block.
+  // The abstract "photo" plate is a stand-in for an image: like the posters
+  // and covers it is finished art, rendered through raw hexOf so it keeps
+  // its colors in both schemes.
   const col = () => Array.from({ length: 9 }, (_, i) =>
     `<span style="background:${hex("base", i % 5 === 4 ? 300 : 200)}"></span>`).join("");
   const spread = `
@@ -72,9 +75,9 @@ export function renderDesign() {
         <div class="design-mag-foot" style="color:${hex("base", 400)}">cola · perceptually uniform since day one</div>
       </div>
       <div class="design-mag-page" style="background:${hex("base", 100)}">
-        <span class="design-mag-photo" style="background:${hex("purple", 600)}">
-          <span class="design-mag-shape" style="background:${hex("purple", 300)}"></span>
-          <span class="design-mag-shape design-mag-shape2" style="background:${hex("yellow", 300)}"></span>
+        <span class="design-mag-photo" style="background:${hexOf("purple", 600)}">
+          <span class="design-mag-shape" style="background:${hexOf("purple", 300)}"></span>
+          <span class="design-mag-shape design-mag-shape2" style="background:${hexOf("yellow", 300)}"></span>
         </span>
         <div class="design-mag-text">${col()}</div>
         <div class="design-mag-text">${col()}</div>

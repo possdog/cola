@@ -241,7 +241,8 @@ at the top, and only one filter can apply at a time.
   tiles (disc, half disc, quarter, and bars from the 300/600/800 trio on
   a 100 ground); and a type specimen where each ramp's 300/600/900 steps
   play display-type weight classes on the lightest ground. The finished
-  artwork — posters, album covers, duotones, pattern tiles — is treated as
+  artwork — posters, album covers, duotones, pattern tiles, and the
+  editorial spread's abstract "photo" plate — is treated as
   pre-rendered graphics: the pane's Light/Dark toggle flips the page around
   them (background, section headings, the editorial spread, the specimen)
   but the figures themselves render identically in both schemes.
