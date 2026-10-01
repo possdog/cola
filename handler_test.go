@@ -539,19 +539,19 @@ func TestTintJSONContract(t *testing.T) {
 	// the base's values: the built-in tint color with intensity 0 (off), so
 	// the palette is untouched.
 	resp := postPalette(t, s, `{}`)
-	if resp.State.TintIntensity != 0 || resp.State.TintHue != 30 ||
-		resp.State.TintL != 0.5 || resp.State.TintChroma != 0.15 {
-		t.Errorf("POST without tint fields = hue %v L %v C %v k %v, want the defaults",
-			resp.State.TintHue, resp.State.TintL, resp.State.TintChroma, resp.State.TintIntensity)
+	if resp.State.TintIntensity != 0 || resp.State.TintHue != 30 || resp.State.TintChroma != 0.15 {
+		t.Errorf("POST without tint fields = hue %v C %v k %v, want the defaults",
+			resp.State.TintHue, resp.State.TintChroma, resp.State.TintIntensity)
 	}
 
 	// The tint rides in the state like saturation: echoed after
-	// normalization and reflected in the generated palette.
+	// normalization and reflected in the generated palette. A legacy
+	// tintL field (from state files written before the tint dropped its
+	// lightness parameter) is simply ignored.
 	resp = postPalette(t, s, `{"tintHue":200,"tintL":0.4,"tintChroma":0.3,"tintIntensity":0.2}`)
-	if resp.State.TintHue != 200 || resp.State.TintL != 0.4 ||
-		resp.State.TintChroma != 0.3 || resp.State.TintIntensity != 0.2 {
-		t.Errorf("posted tint echoed as hue %v L %v C %v k %v",
-			resp.State.TintHue, resp.State.TintL, resp.State.TintChroma, resp.State.TintIntensity)
+	if resp.State.TintHue != 200 || resp.State.TintChroma != 0.3 || resp.State.TintIntensity != 0.2 {
+		t.Errorf("posted tint echoed as hue %v C %v k %v",
+			resp.State.TintHue, resp.State.TintChroma, resp.State.TintIntensity)
 	}
 	plain := postPalette(t, s, `{"tintIntensity":0}`)
 	if got, want := resp.Palette.Colors[0].Swatches[6].Hex, plain.Palette.Colors[0].Swatches[6].Hex; got == want {
@@ -575,9 +575,6 @@ func TestTintJSONContract(t *testing.T) {
 	}
 	if got := postPalette(t, s, `{"tintChroma":9}`).State.TintChroma; got != 0.4 {
 		t.Errorf("tintChroma 9 clamped to %v, want 0.4", got)
-	}
-	if got := postPalette(t, s, `{"tintL":5}`).State.TintL; got != 0.995 {
-		t.Errorf("tintL 5 clamped to %v, want 0.995", got)
 	}
 }
 

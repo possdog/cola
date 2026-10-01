@@ -135,22 +135,21 @@ func TestNormalizedClamps(t *testing.T) {
 	if n4.PinchCenter != 1 {
 		t.Errorf("pinch center not clamped from above: %v", n4.PinchCenter)
 	}
-	// The tint mirrors the per-color chroma cap and the anchors' lightness
-	// bounds; the hue covers the full circle.
+	// The tint mirrors the per-color chroma cap; the hue covers the full
+	// circle. Lightness is not a tint parameter — the tint row rides the
+	// palette's own lightness ramp.
 	s.TintHue = -5
-	s.TintL = 5
 	s.TintChroma = 9
 	s.TintIntensity = 9
 	n5 := s.Normalized()
-	if n5.TintHue != 0 || n5.TintL != 0.995 || n5.TintChroma != 0.4 || n5.TintIntensity != 0.25 {
-		t.Errorf("tint not clamped from above: hue %v L %v C %v k %v",
-			n5.TintHue, n5.TintL, n5.TintChroma, n5.TintIntensity)
+	if n5.TintHue != 0 || n5.TintChroma != 0.4 || n5.TintIntensity != 0.25 {
+		t.Errorf("tint not clamped from above: hue %v C %v k %v",
+			n5.TintHue, n5.TintChroma, n5.TintIntensity)
 	}
-	s.TintL = -1
 	s.TintIntensity = -1
 	n6 := s.Normalized()
-	if n6.TintL != 0.02 || n6.TintIntensity != 0 {
-		t.Errorf("tint not clamped from below: L %v k %v", n6.TintL, n6.TintIntensity)
+	if n6.TintIntensity != 0 {
+		t.Errorf("tint not clamped from below: k %v", n6.TintIntensity)
 	}
 }
 
@@ -292,34 +291,33 @@ func TestGenerateBend(t *testing.T) {
 }
 
 // TestGenerateTint checks the tint's contract through Generate: intensity 0
-// reproduces the untinted palette exactly no matter the tint color, the
-// maximum intensity pulls every swatch's lightness exactly to the mix point
-// with the tint while keeping each level's lightness equal across hues, and
-// the mixer's full-blend endpoint lands on the fitted tint (a fraction the
+// reproduces the untinted palette exactly no matter the tint color, the tint
+// row rides the palette's own lightness ramp so tinting never moves a
+// swatch's lightness at any intensity, a tint matching a palette row mixes
+// that row with itself (the intensity slider has no effect on it), and the
+// mixer's full-blend endpoint lands on the fitted tint (a fraction the
 // state's 0.25 clamp deliberately keeps out of reach).
 func TestGenerateTint(t *testing.T) {
 	plain := Generate(DefaultState())
 
 	// Intensity 0 is the exact identity, whatever the tint color is.
 	s := DefaultState()
-	s.TintHue, s.TintL, s.TintChroma = 200, 0.4, 0.3
+	s.TintHue, s.TintChroma = 200, 0.3
 	if got := Generate(s); got.Colors[3].Swatches[5].Hex != plain.Colors[3].Swatches[5].Hex {
 		t.Error("tint intensity 0 changed the palette")
 	}
 
-	// Max intensity: the mixed lightness sits exactly at the mix point of
-	// the level's base L and the tint's L (chroma fitting holds L fixed),
-	// and it is shared by every row at that level — the tint preserves the
-	// equal-perceived-lightness-per-level guarantee.
+	// At any intensity the tinted lightness is still the level's base L:
+	// the tint row shares the level's L, so the mix point of L with the
+	// tint's L is L itself. Chroma fitting holds L fixed too.
 	const k = 0.25
 	s.TintIntensity = k
 	tinted := Generate(s)
 	for i, row := range plain.Colors {
 		for j, sw := range row.Swatches {
-			got := tinted.Colors[i].Swatches[j]
-			if want := sw.L + (s.TintL-sw.L)*k; math.Abs(got.L-want) > 1e-9 {
-				t.Errorf("%s level %d: tinted L %v, want the mix point %v",
-					row.Name, sw.Level, got.L, want)
+			if got := tinted.Colors[i].Swatches[j].L; got != sw.L {
+				t.Errorf("%s level %d: tinted L %v, want the level's own L %v",
+					row.Name, sw.Level, got, sw.L)
 			}
 		}
 	}
@@ -332,14 +330,36 @@ func TestGenerateTint(t *testing.T) {
 		}
 	}
 
+	// The tint is a hidden tenth row: give it the red row's hue and chroma
+	// and it becomes that row, so mixing is a self-blend and the intensity
+	// leaves the red swatches untouched. (The coordinates go through the
+	// Oklab mix, an OKLCH round trip, and a second gamut fit whose binary
+	// search quantizes near the gamut edge, so compare with a tolerance —
+	// the residue is ~1e-8 of chroma, far below perception.) Every other
+	// row still changes.
+	red := DefaultState()
+	red.TintHue, red.TintChroma, red.TintIntensity = 30, 0.16, 0.25
+	self := Generate(red)
+	for j, sw := range plain.Colors[1].Swatches {
+		got := self.Colors[1].Swatches[j]
+		if math.Abs(got.L-sw.L) > 1e-6 || math.Abs(got.C-sw.C) > 1e-6 || math.Abs(got.H-sw.H) > 1e-6 {
+			t.Errorf("red level %d: self-matching tint changed the swatch: got %v/%v/%v, want %v/%v/%v",
+				sw.Level, got.L, got.C, got.H, sw.L, sw.C, sw.H)
+		}
+	}
+	if self.Colors[0].Swatches[6].Hex == plain.Colors[0].Swatches[6].Hex {
+		t.Error("self-matching tint left the base level-500 swatch unchanged")
+	}
+
 	// The mixer itself is defined up to a full blend, so the collapse
 	// endpoint stays pinned here rather than through the state. A full
 	// blend is the tint alone, to float precision: the Oklab mix plus the
 	// OKLCH round trip and a second chroma fit are exact in theory but not
 	// bit-identical, hence the tolerance.
+	L := 0.5
 	fitted := color.LCh{
-		L: s.TintL,
-		C: color.FitChroma(s.TintL, s.TintHue, s.TintChroma),
+		L: L,
+		C: color.FitChroma(L, s.TintHue, s.TintChroma),
 		H: s.TintHue,
 	}
 	for _, tc := range []color.LCh{{L: 0.7, C: 0.1, H: 120}, {L: 0.2, C: 0.2, H: 30}} {

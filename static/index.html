@@ -53,22 +53,19 @@
              palette sliders, the tint block, and the level-distribution
              controls (bend, pinch). -->
         <hr class="divider">
-        <!-- The tint mixes one fixed color into every swatch: hue,
-             luminosity, and chroma pick the color; intensity how strongly
-             it blends in (0 = off). The hue track is a static full-spectrum
-             gradient — evenly spaced stops because hue 0 and 360 are the
-             same color, so a three-stop gradient would collapse to
-             pink-teal-pink (see buildColorControls in controls.js). -->
+        <!-- The tint is a hidden tenth row of the palette: hue and chroma
+             pick its color, and it rides the palette's own thirteen-level
+             lightness ramp, mixing into every other row level by level;
+             intensity is how strongly it blends in (0 = off). The hue track
+             is a static full-spectrum gradient — evenly spaced stops
+             because hue 0 and 360 are the same color, so a three-stop
+             gradient would collapse to pink-teal-pink (see
+             buildColorControls in controls.js). -->
         <label class="slider-group">
           <span class="label">Tint hue</span>
           <span class="val" id="tintHue-val"></span>
           <input type="range" id="tintHue" min="0" max="360" step="1" value="30"
                  style="background:linear-gradient(90deg, oklch(60% 0.15 0), oklch(60% 0.15 60), oklch(60% 0.15 120), oklch(60% 0.15 180), oklch(60% 0.15 240), oklch(60% 0.15 300), oklch(60% 0.15 360))">
-        </label>
-        <label class="slider-group">
-          <span class="label">Tint luminosity <em class="hint">(Oklab L of the tint)</em></span>
-          <span class="val" id="tintL-val"></span>
-          <input type="range" id="tintL" min="0.02" max="0.995" step="0.005">
         </label>
         <label class="slider-group">
           <span class="label">Tint chroma</span>

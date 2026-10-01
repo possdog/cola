@@ -91,13 +91,15 @@ type State struct {
 	// 50, 1 = level 950). See pinchAt.
 	Pinch       float64 `json:"pinch"`
 	PinchCenter float64 `json:"pinchCenter"`
-	// TintHue, TintL, and TintChroma describe one OKLCH color that gets mixed
-	// into every swatch; TintIntensity is the mix fraction, clamped to
-	// [0,0.25] — beyond a quarter mix the palette stops reading as itself,
-	// so the silly end of the range stays out of reach. The
-	// first three only matter once the intensity departs from 0.
+	// TintHue and TintChroma describe a hidden tenth row of the palette:
+	// a color that rides the palette's own thirteen-level lightness ramp
+	// (its lightness at each level is that level's L) and is mixed into
+	// every other row, level by level, by TintIntensity. The intensity is
+	// the mix fraction, clamped to [0,0.25] — beyond a quarter mix the
+	// palette stops reading as itself, so the silly end of the range stays
+	// out of reach. Hue and chroma only matter once the intensity departs
+	// from 0.
 	TintHue       float64 `json:"tintHue"`
-	TintL         float64 `json:"tintL"`
 	TintChroma    float64 `json:"tintChroma"`
 	TintIntensity float64 `json:"tintIntensity"`
 	// Colors is the per-row spec list.
@@ -144,12 +146,11 @@ func DefaultState() State {
 		Bend:        0,
 		Pinch:       0,
 		PinchCenter: 0.5,
-		// The tint color's own coordinates are arbitrary but chosen to read
-		// as a pleasant warm red at mid lightness; only the zero intensity
-		// (tint off) is load-bearing as the default, keeping the default
-		// palette exactly the untinted one.
+		// The tint color's own coordinates are arbitrary but chosen to
+		// read as a warm red; only the zero intensity (tint off) is
+		// load-bearing as the default, keeping the default palette
+		// exactly the untinted one.
 		TintHue:       30,
-		TintL:         0.5,
 		TintChroma:    0.15,
 		TintIntensity: 0,
 		Colors: []ColorSpec{
@@ -181,13 +182,12 @@ func (s State) Normalized() State {
 	out.Bend = clamp(s.Bend, -1, 1)
 	out.Pinch = clamp(s.Pinch, -0.5, 0.5)
 	out.PinchCenter = clamp(s.PinchCenter, 0, 1)
-	// The tint mirrors the per-color clamps: the same [0,0.4] chroma cap,
-	// and lightness bounds matching the anchors' so the tint is always
-	// representable in sRGB at some chroma. Zero values (a legacy state
-	// file written before the tint feature) clamp to a near-black tint,
-	// which is fine: intensity 0 keeps it out of the palette entirely.
+	// The tint mirrors the per-color clamps: the same [0,0.4] chroma cap
+	// and the full hue circle. Lightness is not a tint parameter — the
+	// tint row rides the palette's own lightness ramp — and zero values
+	// (a legacy state file written before the tint feature) are harmless:
+	// intensity 0 keeps the tint out of the palette entirely.
 	out.TintHue = clamp(s.TintHue, 0, 360)
-	out.TintL = clamp(s.TintL, 0.02, 0.995)
 	out.TintChroma = clamp(s.TintChroma, 0, 0.4)
 	out.TintIntensity = clamp(s.TintIntensity, 0, 0.25)
 	// Copy the color slice before clamping in place: ColorSpec holds only
@@ -294,11 +294,13 @@ func levelT(t float64, s State) float64 {
 	return pinchAt(bendT(t, s.Bend), s.Pinch, s.PinchCenter)
 }
 
-// tintMix blends one swatch toward the tint color. The mix itself runs in
-// Oklab, where a straight line is the perceptual gradient between two
-// colors, and every swatch at a level shares the same base L, so the mixed
-// L — (1-k)·L + k·tint.L — is still identical across hues: tinting preserves
-// the palette's core guarantee of equal perceived lightness per level.
+// tintMix blends one swatch toward the tint color at its level. The mix runs
+// in Oklab, where a straight line is the perceptual gradient between two
+// colors. The tint row rides the palette's own lightness ramp, so the tint's
+// L is bit-identical to the swatch's own level L and the mixed L —
+// (1-k)·L + k·L — stays exactly L: tinting can pull hue and chroma around
+// but never lightness, so the palette's guarantee of equal perceived
+// lightness per level survives by construction.
 // Oklab interpolation can leave the sRGB gamut, so the mix is re-fitted in
 // OKLCH — lightness and hue of the mix held fixed, chroma reduced until it
 // fits — the same discipline the untinted swatch already gets. k=0 must
@@ -323,21 +325,31 @@ func tintMix(c color.LCh, tint color.Lab, k float64) color.LCh {
 func Generate(s State) Palette {
 	s = s.Normalized()
 	p := Palette{Levels: Levels}
-	// The tint is fitted to the gamut once up front, so the mix target is
-	// itself an sRGB color; a chroma or lightness the display can't show
-	// would otherwise bleed into every swatch via the mix fraction.
-	tint := color.LCh{
-		L: s.TintL,
-		C: color.FitChroma(s.TintL, s.TintHue, s.TintChroma),
-		H: s.TintHue,
-	}.ToLab()
+	// The tint is a hidden tenth row: like every other row it rides the
+	// palette's lightness ramp (same bend and pinch, so its L at each
+	// level is that level's own L) and gets the same saturation scaling,
+	// chroma taper, and gamut fit. Two consequences fall out of that.
+	// Mixing a color with a same-L target leaves L exactly unchanged, so
+	// tinting can never break the equal-perceived-lightness-per-level
+	// guarantee; and a tint whose hue and chroma match a palette row makes
+	// that row mix with itself, so the intensity slider has no effect on
+	// it — the tint row *is* that row.
+	tint := make([]color.Lab, len(Levels))
+	for i := range Levels {
+		L := s.MaxL - levelT(lightT[i], s)*(s.MaxL-s.MinL)
+		tint[i] = color.LCh{
+			L: L,
+			C: color.FitChroma(L, s.TintHue, s.TintChroma*s.Saturation*taper(L)),
+			H: s.TintHue,
+		}.ToLab()
+	}
 	for _, cs := range s.Colors {
 		hue := cs.Hue
 		row := ColorResult{Name: cs.Name, Hue: hue}
 		for i, level := range Levels {
 			L := s.MaxL - levelT(lightT[i], s)*(s.MaxL-s.MinL)
 			C := color.FitChroma(L, hue, cs.Chroma*s.Saturation*taper(L))
-			c := tintMix(color.LCh{L: L, C: C, H: hue}, tint, s.TintIntensity)
+			c := tintMix(color.LCh{L: L, C: C, H: hue}, tint[i], s.TintIntensity)
 			lab := c.ToLab()
 			row.Swatches = append(row.Swatches, Swatch{
 				Level: level,

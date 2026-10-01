@@ -93,13 +93,14 @@ async function load() {
   bindSlider("maxL", "maxL", 3);
   bindSlider("minL", "minL", 3);
   bindSlider("saturation", "saturation", 2);
-  // The tint mixes one fixed color into every swatch: hue, luminosity, and
-  // chroma pick the color (all server-side, like every other color here),
-  // intensity how strongly it blends in. Default intensity 0 keeps the
-  // untinted palette. Like the other global sliders all four are part of
-  // the state, so they persist and ride along with the A/B snapshots.
+  // The tint is a hidden tenth row of the palette: hue and chroma pick its
+  // color, and it rides the palette's own thirteen-level lightness ramp
+  // (all server-side, like every other color here), mixing into every
+  // other row level by level; intensity is how strongly it blends in.
+  // Default intensity 0 keeps the untinted palette. Like the other global
+  // sliders all three are part of the state, so they persist and ride
+  // along with the A/B snapshots.
   bindSlider("tintHue", "tintHue", 0, (v) => `${Math.round(v)}°`);
-  bindSlider("tintL", "tintL", 3);
   bindSlider("tintChroma", "tintChroma", 3);
   bindSlider("tintIntensity", "tintIntensity", 2);
   // Bend is centered at 0, which is the identity for the power-law skew:

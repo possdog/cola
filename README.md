@@ -79,19 +79,24 @@ curl --cacert certs/localhost.crt https://127.0.0.1:8443/api/palette
   pinch is 0. The pinch runs after the bend, so the pinch center names a spot
   in the final distribution: the step at that spot stays exactly there.
 - **Saturation** — global chroma multiplier.
-- **Tint hue / luminosity / chroma / intensity** — mixes one fixed color
-  into every swatch of the palette. The first three pick the tint in OKLCH
-  (the same space as everything else; the default is a warm red at mid
-  lightness), and the intensity is the mix fraction: 0 is off (the default,
-  leaving the palette untouched), capped at 0.25 — beyond a quarter mix the
-  palette stops reading as itself, so the silly end stays out of reach. The
-  mix runs in Oklab, where a straight line between two colors is
-  the perceptual gradient, and every swatch at a level starts from the same
-  lightness, so the mixed lightness — pulled toward the tint's by the same
-  fraction everywhere — is still identical across hues: tinting preserves
-  the equal-perceived-lightness-per-level guarantee. A mix can leave the
-  sRGB gamut; it is chroma-fitted at the mixed lightness and hue, the same
-  discipline every other swatch gets.
+- **Tint hue / chroma / intensity** — mixes a hidden tenth row into every
+  other row of the palette. Hue and chroma pick the tint's color in OKLCH
+  (the same space as everything else; the default is a warm red), and the
+  tint's lightness is not a parameter: it rides the palette's own
+  thirteen-level lightness ramp, so at each level the tint has exactly that
+  level's lightness, the same saturation scaling, chroma taper, and gamut
+  fit as every other row. The intensity is the mix fraction: 0 is off (the
+  default, leaving the palette untouched), capped at 0.25 — beyond a quarter
+  mix the palette stops reading as itself, so the silly end stays out of
+  reach. The mix runs in Oklab, where a straight line between two colors is
+  the perceptual gradient; because the tint's lightness at each level is
+  the level's own, the mix can pull hue and chroma around but never
+  lightness — tinting preserves the equal-perceived-lightness-per-level
+  guarantee exactly. Because the tint is built like a real row, a tint
+  whose hue and chroma match a palette row makes that row mix with itself:
+  the intensity slider has no effect on it. A mix can leave the sRGB gamut;
+  it is chroma-fitted at the mixed lightness and hue, the same discipline
+  every other swatch gets.
 - **Per-color hue and chroma** — precise OKLCH values for each of the nine
   rows. Each chromatic color's hue is limited to ±30° around its ideal OKLCH
   center, so red stays recognizably red. (Oklab hue differs from HSL: hue 0
@@ -343,7 +348,6 @@ State shape:
   "pinch": 0,
   "pinchCenter": 0.5,
   "tintHue": 30,
-  "tintL": 0.5,
   "tintChroma": 0.15,
   "tintIntensity": 0,
   "colors": [
@@ -356,17 +360,19 @@ State shape:
 `hue` is the OKLCH hue angle in degrees, clamped server-side to the color's
 ±30° window around its ideal center; `chroma` is the target OKLCH chroma
 at peak lightness (chroma tapers toward the light/dark extremes so the
-endpoints don't look oversaturated). The `tint*` fields pick the tint color
-and its mix fraction: `tintHue` in `[0,360]`, `tintL` in `[0.02,0.995]`,
-`tintChroma` in `[0,0.4]`, and `tintIntensity` in `[0,0.25]`, all clamped
-server-side. A state written before the tint feature (the fields absent)
-loads with intensity 0, so the palette is unchanged.
+endpoints don't look oversaturated). The `tint*` fields pick the tint row's
+hue and chroma and its mix fraction: `tintHue` in `[0,360]`, `tintChroma` in
+`[0,0.4]`, and `tintIntensity` in `[0,0.25]`, all clamped server-side; the
+tint's lightness follows the palette's level ramp, so it has no field of its
+own. A state written before the tint feature (the fields absent), or one
+carrying a legacy `tintL` value, loads with intensity 0, so the palette is
+unchanged.
 
 `state.json` wraps this object in an envelope:
 
 ```json
 {
-  "state": { "minL": 0.17, "maxL": 0.985, "saturation": 1, "bend": 0, "pinch": 0, "pinchCenter": 0.5, "tintHue": 30, "tintL": 0.5, "tintChroma": 0.15, "tintIntensity": 0, "colors": [] },
+  "state": { "minL": 0.17, "maxL": 0.985, "saturation": 1, "bend": 0, "pinch": 0, "pinchCenter": 0.5, "tintHue": 30, "tintChroma": 0.15, "tintIntensity": 0, "colors": [] },
   "ab": { "active": "A", "slots": { "A": { "…": "the state shape above" }, "B": null } }
 }
 ```
