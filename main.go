@@ -37,6 +37,14 @@ type paletteRequest struct {
 	// while "bluelight" is in Filters. Like other view filters it is
 	// display-only and never persisted.
 	BlueLight float64 `json:"blueLight"`
+	// ActiveSlot is the A/B slot the client is working in ("A" or "B").
+	// Together with Slots it lets the server persist both comparison
+	// variants; a request without it keeps the stored active slot.
+	ActiveSlot string `json:"activeSlot"`
+	// Slots carries the client's A/B snapshots. Only the inactive slot's
+	// entry is read — the active slot is always the posted state itself,
+	// which cannot be staler than the palette it just produced.
+	Slots *abSnapshot `json:"slots"`
 }
 
 // paletteResponse is the JSON body for both GET (defaults) and POST
@@ -45,6 +53,9 @@ type paletteRequest struct {
 type paletteResponse struct {
 	State   palette.State   `json:"state"`
 	Palette palette.Palette `json:"palette"`
+	// AB is the A/B comparison record (active slot plus both snapshots), so
+	// a reload restores both variants, not just the active palette.
+	AB abState `json:"ab"`
 	// Filtered is the palette as seen through the requested view filters,
 	// omitted when none are active. Display only — exports must use Palette.
 	Filtered *palette.Palette `json:"filtered,omitempty"`
@@ -68,7 +79,10 @@ type server struct {
 	mu sync.RWMutex
 	// base is the current state: it seeds GET responses and fills in any
 	// fields a partial POST leaves out.
-	base  palette.State
+	base palette.State
+	// ab is the A/B comparison record. Its active slot's snapshot always
+	// equals base (updateAB maintains that), so the two never contradict.
+	ab    abState
 	store *stateStore
 }
 
@@ -86,10 +100,54 @@ func (s *server) setBase(st palette.State) {
 	s.mu.Unlock()
 }
 
-// buildResponse renders a normalized state (plus optional view filters) as
-// the API payload shared by the palette and reset handlers.
-func buildResponse(st palette.State, filterNames []string, opts palette.FilterOptions) paletteResponse {
-	resp := paletteResponse{State: st, Palette: palette.Generate(st)}
+// currentAB returns the stored A/B record. The copy is shallow: slot
+// snapshots are only ever replaced, never mutated in place, so the shared
+// pointers are safe for the read-only marshaling callers do.
+func (s *server) currentAB() abState {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.ab
+}
+
+// updateAB merges a request's A/B fields into the stored record and returns
+// it. The active slot's snapshot becomes the freshly posted state (it cannot
+// be staler than the palette itself); the other slot changes only when the
+// request carries a snapshot for it — swap and copy are the only such
+// moments. A request without a valid activeSlot keeps the stored active
+// slot, so plain state posts from older clients still refresh the record.
+func (s *server) updateAB(req paletteRequest, active palette.State) abState {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	slot := req.ActiveSlot
+	if slot != "A" && slot != "B" {
+		slot = s.ab.Active
+		if slot != "A" && slot != "B" {
+			slot = "A"
+		}
+	}
+	other := "B"
+	if slot == "B" {
+		other = "A"
+	}
+	// The other slot keeps its stored snapshot unless the request carries
+	// one; cleanSlot normalizes into a private deep copy or drops an
+	// entryless snapshot, so the stored record never aliases the request.
+	otherSnap := s.ab.Slots.get(other)
+	if req.Slots != nil && req.Slots.get(other) != nil {
+		otherSnap = req.Slots.get(other)
+	}
+	ab := abState{Active: slot}
+	ab.Slots.set(slot, cleanSlot(&active))
+	ab.Slots.set(other, cleanSlot(otherSnap))
+	s.ab = ab
+	return ab
+}
+
+// buildResponse renders a normalized state (plus optional view filters and
+// the A/B record) as the API payload shared by the palette and reset
+// handlers.
+func buildResponse(st palette.State, ab abState, filterNames []string, opts palette.FilterOptions) paletteResponse {
+	resp := paletteResponse{State: st, AB: ab, Palette: palette.Generate(st)}
 	// Only recognized filters produce a filtered copy; unknown names in the
 	// list are dropped rather than erroring.
 	if active := slices.DeleteFunc(slices.Clone(filterNames), func(f string) bool { return !palette.IsFilter(f) }); len(active) > 0 {
@@ -147,28 +205,35 @@ func (s *server) handlePalette(w http.ResponseWriter, r *http.Request) {
 		// slice with the previous base (see currentBase/cloneState), so
 		// the swap is safe without further copying.
 		s.setBase(st)
-		// Remember the palette settings across restarts. View filters are
-		// deliberately not part of State and so are never persisted. The
-		// store debounces the disk write.
-		s.store.save(st)
+		// Remember the palette settings and the A/B record across
+		// restarts. View filters are deliberately not part of State and
+		// so are never persisted. The store debounces the disk write.
+		ab := s.updateAB(req, st)
+		s.store.save(st, ab)
+		writeJSON(w, buildResponse(st, ab, req.Filters, palette.FilterOptions{BlueLight: req.BlueLight}))
+		return
 	}
-	writeJSON(w, buildResponse(st, req.Filters, palette.FilterOptions{BlueLight: req.BlueLight}))
+	writeJSON(w, buildResponse(st, s.currentAB(), req.Filters, palette.FilterOptions{BlueLight: req.BlueLight}))
 }
 
 // handleReset restores the built-in defaults atomically and persists them.
-// The optional body may carry view filters (same names as /api/palette) so
-// the response matches what the client is looking at; anything else in it
-// is ignored, and a missing or malformed body is fine too — resetting
-// should never fail on account of the body.
+// The optional body may carry view filters (same names as /api/palette) and
+// activeSlot, so the response matches what the client is looking at and the
+// reset defaults become the active slot's snapshot; anything else in it —
+// including a slots map, which must never let a reset clobber the variant
+// being compared against — is ignored, and a missing or malformed body is
+// fine too: resetting should never fail on account of the body.
 func (s *server) handleReset(w http.ResponseWriter, r *http.Request) {
 	var req paletteRequest
 	if body, err := io.ReadAll(io.LimitReader(r.Body, 1<<20)); err == nil {
 		_ = json.Unmarshal(body, &req)
 	}
+	req.Slots = nil
 	st := palette.DefaultState().Normalized()
 	s.setBase(st)
-	s.store.save(st)
-	writeJSON(w, buildResponse(st, req.Filters, palette.FilterOptions{BlueLight: req.BlueLight}))
+	ab := s.updateAB(req, st)
+	s.store.save(st, ab)
+	writeJSON(w, buildResponse(st, ab, req.Filters, palette.FilterOptions{BlueLight: req.BlueLight}))
 }
 
 func main() {
@@ -184,10 +249,10 @@ func main() {
 	loaded, err := loadState(*stateFile)
 	if err != nil {
 		log.Printf("state file %s: %v; starting from defaults", *stateFile, err)
-		loaded = palette.DefaultState()
+		loaded = defaultPersistedState()
 	}
-	base := loaded.Normalized()
-	srv := &server{base: base, store: newStateStore(*stateFile, base)}
+	base := loaded.State.Normalized()
+	srv := &server{base: base, ab: loaded.AB, store: newStateStore(*stateFile, loaded)}
 
 	staticFS, err := fs.Sub(staticFiles, "static")
 	if err != nil {

@@ -21,9 +21,12 @@ go run . -http      # plain HTTP, for scripting
 
 The server remembers your palette settings between runs: they are written to
 `state.json` (override with `-state`) about half a second after the last
-change, flushed on Ctrl-C, and loaded on the next start. View filters are
+change, flushed on Ctrl-C, and loaded on the next start. The A/B comparison
+record (both slots and which one is active) is persisted in the same file,
+so neither variant is lost to a reload or restart. View filters are
 deliberately not persisted. A missing or corrupt state file falls back to
-the default palette.
+the default palette; files written before the A/B feature (a bare state
+object) still load and count as slot A.
 
 The server serves HTTPS by default. On first run it generates a self-signed
 certificate for `localhost`, `127.0.0.1`, and `::1` into `certs/` and reuses it
@@ -69,10 +72,10 @@ settings into the active slot and load the other, so clicking back and
 forth flips between the two. The middle arrow copies the active slot's
 settings into the other without switching; it points in the copy
 direction — useful for making both slots identical before diverging
-one, or for discarding the other variant. Slots are page-local — the
-server keeps persisting
-only the active palette — and switching to the still-empty slot seeds it
-with the current settings, so the first toggle changes nothing by itself.
+one, or for discarding the other variant. Both slots are persisted by the
+server (see HTTP API below), so a reload or restart restores the whole
+record — the first toggle after a fresh start still seeds an empty slot
+with the current settings, so it changes nothing by itself.
 **Reset to defaults** restores the built-in palette (two clicks: the first
 arms the button and the second confirms); the restored defaults are
 persisted like any other change.
@@ -153,8 +156,19 @@ under blue light.
 - `POST /api/reset` — restores the built-in default state and persists it;
   returns the same response shape as above. The body is optional and may
   carry the same `filters` array and `blueLight` intensity for the
-  display-only `filtered` copy; anything
-  else in it (including a malformed body) is ignored.
+  display-only `filtered` copy, plus `activeSlot` so the defaults become the
+  active slot's snapshot; anything
+  else in it (including a `slots` map and a malformed body) is ignored — a
+  reset must never clobber the variant being compared against.
+
+**A/B record.** Every response carries `ab`: the active slot (`"A"` or
+`"B"`) and each slot's settings snapshot (`null` when never saved). The
+record is persisted in `state.json` together with the active state. A
+`POST` may include `activeSlot` and a `slots` map: the active slot's
+snapshot always becomes the posted state, and the other slot changes only
+when the request carries a non-null snapshot for it (the swap and copy
+buttons are the only such moments). Requests without these fields keep the
+stored record, so plain API clients are unaffected.
 
 State shape:
 
@@ -174,6 +188,15 @@ State shape:
 ±30° window around its ideal center; `chroma` is the target OKLCH chroma
 at peak lightness (chroma tapers toward the light/dark extremes so the
 endpoints don't look oversaturated).
+
+`state.json` wraps this object in an envelope:
+
+```json
+{
+  "state": { "minL": 0.17, "maxL": 0.985, "saturation": 1, "colors": [] },
+  "ab": { "active": "A", "slots": { "A": { "…": "the state shape above" }, "B": null } }
+}
+```
 
 ## Layout
 

@@ -550,7 +550,16 @@ async function update() {
     const data = await fetchJSON("/api/palette", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...state, filters: filter ? [filter] : [], blueLight }),
+      // activeSlot plus the slot snapshots ride along so the server
+      // persists the A/B record with the palette: the active slot always
+      // comes from the posted state, the other from the client's copy.
+      body: JSON.stringify({
+        ...state,
+        filters: filter ? [filter] : [],
+        blueLight,
+        activeSlot: abActive,
+        slots: { A: abSlots.A, B: abSlots.B },
+      }),
     });
     if (seq !== updateSeq) return;
     palette = data.palette;
@@ -594,12 +603,16 @@ async function resetPalette() {
     const data = await fetchJSON("/api/reset", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ filters: filter ? [filter] : [], blueLight }),
+      // activeSlot rides along so the server records the defaults as the
+      // active slot's snapshot; the other slot is left untouched.
+      body: JSON.stringify({ filters: filter ? [filter] : [], blueLight, activeSlot: abActive }),
     });
     if (seq !== updateSeq) return;
     state = data.state;
     palette = data.palette;
     view = data.filtered || data.palette;
+    // The active slot now holds the defaults, same rule as a swap.
+    abSlots[abActive] = cloneState(data.state);
     // Move the already-bound global sliders to the restored values; the
     // per-color rows are rebuilt from scratch (fresh listeners included).
     globalSync.forEach((sync) => sync());
@@ -614,12 +627,11 @@ async function resetPalette() {
 
 // ---- A/B slots ---------------------------------------------------------------
 
-// The A/B buttons compare two variants of the settings: the toggle saves the
-// current state into the active slot, then loads the other slot, and
-// copy-to-other overwrites the inactive slot without switching. The slots
-// hold full settings snapshots in the page only — the server keeps
-// persisting just the active palette — so a reload starts a fresh A and an
-// empty B.
+// The A/B buttons compare two variants of the settings: the halves swap
+// slots and the middle arrow copies the active slot into the other. The
+// server persists the whole record (see persist.go), so both variants
+// survive a reload or a server restart — the client keeps its own copy for
+// instant interaction and syncs it with every update.
 let abActive = "A";
 const abSlots = { A: null, B: null };
 
@@ -647,6 +659,9 @@ function copyAB() {
   const other = abActive === "A" ? "B" : "A";
   abSlots[other] = cloneState(state);
   toast(`Copied ${abActive} to ${other}`);
+  // The overwritten slot must reach the server; the palette itself is
+  // unchanged, so this sync only updates the persisted A/B record.
+  update();
 }
 
 async function swapAB() {
@@ -777,9 +792,15 @@ async function load() {
   });
   $("#copy-css").addEventListener("click", () => copyText(paletteToCSS(), "CSS variables copied"));
   $("#copy-json").addEventListener("click", () => copyText(paletteToJSON(), "JSON copied"));
-  // A/B: slot A starts as the loaded settings; B stays empty until the
-  // first toggle seeds it.
-  abSlots.A = cloneState(state);
+  // A/B: restore the server-persisted record — both slots and which one is
+  // active — so a reload or restart keeps both variants, not just the active
+  // palette. A missing record (older server) falls back to seeding slot A
+  // from the loaded state.
+  const ab = data.ab;
+  abActive = ab && ab.active === "B" ? "B" : "A";
+  abSlots.A = ab && ab.slots && ab.slots.A ? cloneState(ab.slots.A) : null;
+  abSlots.B = ab && ab.slots && ab.slots.B ? cloneState(ab.slots.B) : null;
+  if (!abSlots[abActive]) abSlots[abActive] = cloneState(state);
   setABButton();
   // Segmented A/B: the halves swap slots (clicking the active half is a
   // no-op); the middle arrow, the only segment without a data-slot, copies
