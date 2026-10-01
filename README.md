@@ -180,8 +180,8 @@ at the top, and only one filter can apply at a time.
   ramps with luminance-picked ink, so the report scores the palette with the
   palette.
 - **Code** — a syntax-highlighted TypeScript sample shown in three programming
-  environments, toggled at the top of the pane (a display-only preference,
-  never persisted):
+  environments, toggled at the top of the pane beside a Light/Dark theme
+  toggle (display-only preferences, never persisted):
   - *Graphical* — a modern editor in the VS Code / Sublime mold: activity
     rail (one SVG icon per chromatic row at its 400 step), file sidebar with
     per-type dots, a yellow git-modified marker, tab strip with per-file
@@ -239,6 +239,21 @@ at the top, and only one filter can apply at a time.
   tiles (disc, half disc, quarter, and bars from the 300/600/800 trio on
   a 100 ground); and a type specimen where each ramp's 300/600/900 steps
   play display-type weight classes on the lightest ground.
+
+**Light/dark toggle**: the Code, Notes, Landing, and Design previews each
+carry a Light/Dark button pair at the top of the pane (beside the Code
+pane's environment group). Like the wheel layout and code environment
+modes it is a display-only preference: never persisted, applied by
+redrawing from the already-fetched response. The dark face is the level
+complement — every level resolves to its opposite across the ramp's
+midpoint (50↔950, 200↔800, 500 fixed; a bijection on all thirteen
+levels) — so every authored pairing keeps its perceived-lightness gap
+with the faces swapped, which is exactly the guarantee the
+equal-lightness ramp exists to make. Defaults match each mock's native
+face (the code environments are dark, the other three light), and copy
+that names levels (the Notes pairing chips, the Landing legend, the
+Design section blurbs) is generated from the resolved levels so the
+labels stay honest after a toggle.
 
 The previews re-render live from the palette being designed, so moving a
 slider restyles them exactly like the grid; they also honor the view filters

@@ -13,6 +13,10 @@ import { setABButton, copyAB, swapAB } from "./ab.js";
 import { paletteToCSS, paletteToJSON } from "./exports.js";
 import { renderWheel, setWheelMode } from "./preview/wheel.js";
 import { renderCode, setCodeMode } from "./preview/code.js";
+import { renderNotes } from "./preview/notes.js";
+import { renderLanding } from "./preview/landing.js";
+import { renderDesign } from "./preview/design.js";
+import { setScheme } from "./preview/scheme.js";
 
 // ---- reset -----------------------------------------------------------------
 
@@ -156,6 +160,22 @@ async function load() {
     const modeBtn = e.target.closest(".code-mode-btn");
     if (modeBtn && setCodeMode(modeBtn.dataset.mode)) renderCode();
   });
+  // Light/dark scheme toggles on the Code, Notes, Landing, and Design
+  // previews. Like the mode buttons this is a display-only preference: the
+  // redraw complements the levels of the already-fetched response, so no
+  // new request is needed and nothing is persisted.
+  const SCHEME_RENDERS = {
+    "#code-preview": renderCode,
+    "#notes-preview": renderNotes,
+    "#landing-preview": renderLanding,
+    "#design-preview": renderDesign,
+  };
+  for (const [sel, render] of Object.entries(SCHEME_RENDERS)) {
+    $(sel).addEventListener("click", (e) => {
+      const btn = e.target.closest(".scheme-btn");
+      if (btn && setScheme(btn.dataset.tab, btn.dataset.scheme)) render();
+    });
+  }
   $("#copy-css").addEventListener("click", () => copyText(paletteToCSS(), "CSS variables copied"));
   $("#copy-json").addEventListener("click", () => copyText(paletteToJSON(), "JSON copied"));
   // A/B: restore the server-persisted record — both slots and which one is

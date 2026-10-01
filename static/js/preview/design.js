@@ -6,17 +6,22 @@
 
 import { store } from "../store.js";
 import { $, esc } from "../util.js";
-import { hexOf } from "../swatch.js";
+import { hexFor, levelFor, schemeToggle } from "./scheme.js";
 
 export function renderDesign() {
+  // Scheme-bound lookups: the scenarios are authored on their light face,
+  // and the toggle complements every level so the whole page flips dark.
+  // lvl keeps the section copy naming the levels actually on screen.
+  const hex = hexFor("design");
+  const lvl = (n) => levelFor("design", n);
   const chrom = store.view.colors.filter((c) => c.name !== "base");
 
   // Section heading, same convention as the Landing tab: each demo block
   // reads as a labeled scenario rather than a pile of unlabeled swatches.
   const sec = (title, sub) => `
     <div class="design-sec">
-      <h3 style="color:${hexOf("base", 950)}">${title}</h3>
-      <p style="color:${hexOf("base", 500)}">${sub}</p>
+      <h3 style="color:${hex("base", 950)}">${title}</h3>
+      <p style="color:${hex("base", 500)}">${sub}</p>
     </div>`;
 
   // Poster series: one Swiss-style poster per chromatic ramp. The 500 step
@@ -25,13 +30,13 @@ export function renderDesign() {
   // level-200 disc as the geometric accent. Posters survive the grayscale
   // filter only if the disc's level stays visibly lighter than the ground.
   const posters = chrom.map((c, i) => `
-    <figure class="design-poster" style="background:${hexOf(c.name, 500)}">
-      <figcaption class="design-poster-meta" style="color:${hexOf(c.name, 100)}">
+    <figure class="design-poster" style="background:${hex(c.name, 500)}">
+      <figcaption class="design-poster-meta" style="color:${hex(c.name, 100)}">
         <span>COLA STUDIO</span><span>No. ${String(i + 1).padStart(2, "0")}</span>
       </figcaption>
-      <span class="design-poster-disc" style="background:${hexOf(c.name, 200)}"></span>
-      <span class="design-poster-word" style="color:${hexOf("base", 50)}">${esc(c.name).toUpperCase()}</span>
-      <figcaption class="design-poster-meta" style="color:${hexOf("base", 50)}">
+      <span class="design-poster-disc" style="background:${hex(c.name, 200)}"></span>
+      <span class="design-poster-word" style="color:${hex("base", 50)}">${esc(c.name).toUpperCase()}</span>
+      <figcaption class="design-poster-meta" style="color:${hex("base", 50)}">
         <span>OKLCH ${Math.round(c.swatches[5] ? c.swatches[5].h : 0)}</span><span>13 STEPS</span>
       </figcaption>
     </figure>`).join("");
@@ -43,27 +48,27 @@ export function renderDesign() {
   // bars alternate between the 200 and 300 tints so a paragraph reads as
   // having highlight lines rather than one flat gray block.
   const col = () => Array.from({ length: 9 }, (_, i) =>
-    `<span style="background:${hexOf("base", i % 5 === 4 ? 300 : 200)}"></span>`).join("");
+    `<span style="background:${hex("base", i % 5 === 4 ? 300 : 200)}"></span>`).join("");
   const spread = `
-    <div class="design-mag" style="background:${hexOf("base", 50)}">
+    <div class="design-mag" style="background:${hex("base", 50)}">
       <div class="design-mag-page">
-        <p class="design-kicker" style="color:${hexOf("red", 600)}">Field Notes — Issue 07</p>
-        <h2 class="design-mag-head" style="color:${hexOf("base", 950)}">The quiet arithmetic of color.</h2>
+        <p class="design-kicker" style="color:${hex("red", 600)}">Field Notes — Issue 07</p>
+        <h2 class="design-mag-head" style="color:${hex("base", 950)}">The quiet arithmetic of color.</h2>
         <div class="design-mag-cols">
-          <p class="design-mag-lede" style="color:${hexOf("base", 700)}"><span class="design-dropcap" style="background:${hexOf("cyan", 600)};color:${hexOf("base", 50)}">E</span>very level of a Cola palette sits at a fixed Oklab lightness. Drag a hue slider and the ramp swings around the wheel without ever wobbling in brightness — the property this spread is set in.</p>
+          <p class="design-mag-lede" style="color:${hex("base", 700)}"><span class="design-dropcap" style="background:${hex("cyan", 600)};color:${hex("base", 50)}">E</span>very level of a Cola palette sits at a fixed Oklab lightness. Drag a hue slider and the ramp swings around the wheel without ever wobbling in brightness — the property this spread is set in.</p>
           <div class="design-mag-text">${col()}</div>
           <div class="design-mag-text">${col()}</div>
         </div>
-        <blockquote class="design-pull" style="border-color:${hexOf("cyan", 500)}">
-          <p style="color:${hexOf("cyan", 800)}">"Equal lightness, thirteen steps, no muddy endpoints."</p>
+        <blockquote class="design-pull" style="border-color:${hex("cyan", 500)}">
+          <p style="color:${hex("cyan", 800)}">"Equal lightness, thirteen steps, no muddy endpoints."</p>
         </blockquote>
         <div class="design-mag-text">${col()}</div>
-        <div class="design-mag-foot" style="color:${hexOf("base", 400)}">cola · perceptually uniform since day one</div>
+        <div class="design-mag-foot" style="color:${hex("base", 400)}">cola · perceptually uniform since day one</div>
       </div>
-      <div class="design-mag-page" style="background:${hexOf("base", 100)}">
-        <span class="design-mag-photo" style="background:${hexOf("purple", 600)}">
-          <span class="design-mag-shape" style="background:${hexOf("purple", 300)}"></span>
-          <span class="design-mag-shape design-mag-shape2" style="background:${hexOf("yellow", 300)}"></span>
+      <div class="design-mag-page" style="background:${hex("base", 100)}">
+        <span class="design-mag-photo" style="background:${hex("purple", 600)}">
+          <span class="design-mag-shape" style="background:${hex("purple", 300)}"></span>
+          <span class="design-mag-shape design-mag-shape2" style="background:${hex("yellow", 300)}"></span>
         </span>
         <div class="design-mag-text">${col()}</div>
         <div class="design-mag-text">${col()}</div>
@@ -75,9 +80,9 @@ export function renderDesign() {
   // interpolates in sRGB, which is exactly what a designer would ship, so
   // the preview shows the blend honestly rather than re-deriving it.
   const covers = chrom.map((c, i) => `
-    <figure class="design-cover" style="background:linear-gradient(135deg, ${hexOf(c.name, 400)} 0%, ${hexOf(c.name, 800)} 100%)">
-      <figcaption class="design-cover-title" style="color:${hexOf("base", 50)}">Signal ${String(i + 1).padStart(2, "0")}</figcaption>
-      <figcaption class="design-cover-artist" style="color:${hexOf(c.name, 100)}">${esc(c.name)} era</figcaption>
+    <figure class="design-cover" style="background:linear-gradient(135deg, ${hex(c.name, 400)} 0%, ${hex(c.name, 800)} 100%)">
+      <figcaption class="design-cover-title" style="color:${hex("base", 50)}">Signal ${String(i + 1).padStart(2, "0")}</figcaption>
+      <figcaption class="design-cover-artist" style="color:${hex(c.name, 100)}">${esc(c.name)} era</figcaption>
     </figure>`).join("");
 
   // Duotones: cross-hue gradients — each chromatic ramp blended into its
@@ -90,9 +95,9 @@ export function renderDesign() {
   const duos = chrom.map((c, i) => {
     const next = chrom[(i + 1) % chrom.length].name;
     return `
-    <figure class="design-cover" style="background:linear-gradient(135deg, ${hexOf(c.name, 500)} 0%, ${hexOf(next, 500)} 100%)">
-      <figcaption class="design-cover-title" style="color:${hexOf("base", 50)}">${esc(c.name)} × ${esc(next)}</figcaption>
-      <figcaption class="design-cover-artist" style="color:${hexOf("base", 100)}">level 500 · cross-hue</figcaption>
+    <figure class="design-cover" style="background:linear-gradient(135deg, ${hex(c.name, 500)} 0%, ${hex(next, 500)} 100%)">
+      <figcaption class="design-cover-title" style="color:${hex("base", 50)}">${esc(c.name)} × ${esc(next)}</figcaption>
+      <figcaption class="design-cover-artist" style="color:${hex("base", 100)}">level 500 · cross-hue</figcaption>
     </figure>`;
   }).join("");
 
@@ -100,14 +105,14 @@ export function renderDesign() {
   // in the 300/600 pair on a 100 ground — the Bauhaus-derived vocabulary
   // behind a lot of current packaging and web illustration.
   const tiles = chrom.map((c) => `
-    <div class="design-tile" style="background:${hexOf(c.name, 100)}">
-      <span class="design-tile-disc" style="background:${hexOf(c.name, 600)}"></span>
-      <span class="design-tile-half" style="background:${hexOf(c.name, 300)}"></span>
-      <span class="design-tile-quarter" style="background:${hexOf(c.name, 800)}"></span>
+    <div class="design-tile" style="background:${hex(c.name, 100)}">
+      <span class="design-tile-disc" style="background:${hex(c.name, 600)}"></span>
+      <span class="design-tile-half" style="background:${hex(c.name, 300)}"></span>
+      <span class="design-tile-quarter" style="background:${hex(c.name, 800)}"></span>
       <span class="design-tile-bars">
-        <span style="background:${hexOf(c.name, 600)}"></span>
-        <span style="background:${hexOf(c.name, 300)}"></span>
-        <span style="background:${hexOf(c.name, 800)}"></span>
+        <span style="background:${hex(c.name, 600)}"></span>
+        <span style="background:${hex(c.name, 300)}"></span>
+        <span style="background:${hex(c.name, 800)}"></span>
       </span>
     </div>`).join("");
 
@@ -116,29 +121,30 @@ export function renderDesign() {
   // — the light ink must hold against the dark, and the dark against the
   // light, with no re-tuning.
   const specimen = chrom.map((c) => `
-    <div class="design-spec-row" style="border-color:${hexOf("base", 200)}">
-      <span class="design-spec-aa" style="color:${hexOf(c.name, 600)}">Aa</span>
+    <div class="design-spec-row" style="border-color:${hex("base", 200)}">
+      <span class="design-spec-aa" style="color:${hex(c.name, 600)}">Aa</span>
       <span class="design-spec-meta">
-        <span style="color:${hexOf("base", 900)}">${esc(c.name)} 600</span>
-        <span style="color:${hexOf(c.name, 300)}">Aa ${esc(c.name)} 300</span>
-        <span style="color:${hexOf(c.name, 900)}">${esc(c.name)} 900 heavy</span>
+        <span style="color:${hex("base", 900)}">${esc(c.name)} ${lvl(600)}</span>
+        <span style="color:${hex(c.name, 300)}">Aa ${esc(c.name)} ${lvl(300)}</span>
+        <span style="color:${hex(c.name, 900)}">${esc(c.name)} ${lvl(900)} heavy</span>
       </span>
-      <span class="design-spec-hex" style="color:${hexOf("base", 400)}">${hexOf(c.name, 600)}</span>
+      <span class="design-spec-hex" style="color:${hex("base", 400)}">${hex(c.name, 600)}</span>
     </div>`).join("");
 
   $("#design-preview").innerHTML = `
-    <div class="design-page" style="background:${hexOf("base", 50)}">
-      ${sec("Posters", "One poster per ramp: the 500 step as ground, oversized level-50 ink, a 200-step disc. Under the grayscale filter the disc must stay visibly lighter than its ground.")}
+    <div class="preview-tools">${schemeToggle("design")}</div>
+    <div class="design-page" style="background:${hex("base", 50)}">
+      ${sec("Posters", `One poster per ramp: the ${lvl(500)} step as ground, oversized level-${lvl(50)} ink, a ${lvl(200)}-step disc. Under the grayscale filter the disc must stay visibly lighter than its ground.`)}
       <div class="design-posters">${posters}</div>
-      ${sec("Editorial", "A magazine spread on the light end of base: red kicker, cyan drop cap and pull quote, body copy drawn as tinted bars.")}
+      ${sec("Editorial", `A magazine spread on the ${lvl(50) === 50 ? "light" : "dark"} end of base: red kicker, cyan drop cap and pull quote, body copy drawn as tinted bars.`)}
       ${spread}
-      ${sec("Album art", "Two-step gradients (400 to 800) — the expressive middle of every ramp, blended the way CSS actually ships them.")}
+      ${sec("Album art", `Two-step gradients (${lvl(400)} to ${lvl(800)}) — the expressive middle of every ramp, blended the way CSS actually ships them.`)}
       <div class="design-covers">${covers}</div>
       ${sec("Duotones", "Adjacent hues blended at the shared 500 step — a gradient that crosses hue but not lightness. Under the grayscale filter each tile should flatten to a single gray: the equal-lightness check in reverse.")}
       <div class="design-covers">${duos}</div>
-      ${sec("Patterns", "Flat geometric shapes per ramp: the 300/600/800 trio on a 100 ground — the vocabulary behind current packaging and illustration.")}
+      ${sec("Patterns", `Flat geometric shapes per ramp: the ${lvl(300)}/${lvl(600)}/${lvl(800)} trio on a ${lvl(100)} ground — the vocabulary behind current packaging and illustration.`)}
       <div class="design-tiles">${tiles}</div>
-      ${sec("Type specimen", "Display type per ramp on the lightest ground: the 300/600/900 trio as weight classes that must hold without re-tuning.")}
+      ${sec("Type specimen", `Display type per ramp on the ${lvl(50) === 50 ? "lightest" : "darkest"} ground: the ${lvl(300)}/${lvl(600)}/${lvl(900)} trio as weight classes that must hold without re-tuning.`)}
       <div class="design-specimen">${specimen}</div>
     </div>`;
 }

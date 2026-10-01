@@ -379,19 +379,32 @@ input[type="range"]::-moz-range-thumb {
 /* preserveAspectRatio keeps the 1000x1000 viewBox letterboxed inside whatever
    box the pane gives it, so the wheel is always a circle. */
 .wheel-svg { flex: 1; min-height: 0; width: 100%; }
-/* Mode toggles rendered by app.js at the top of the Wheel and Code panes
-   (the wheel's layout, the code preview's environment). Styled like the tab
-   pills but smaller; the generic button rules set a larger padding and
+/* Toolbars rendered by the preview modules at the top of their panes: the
+   wheel's layout toggle, the code pane's environment + light/dark groups,
+   and the scheme toggle on the Notes/Landing/Design panes. Styled like the
+   tab pills but smaller; the generic button rules set a larger padding and
    raised background, so those are re-overridden here. */
-.wheel-mode { display: flex; gap: 6px; }
-.code-mode {
+.preview-tools {
   display: flex;
   justify-content: center;
-  gap: 6px;
+  align-items: center;
+  gap: 14px;
   margin-bottom: 10px;
+  flex-shrink: 0;
 }
+/* Thin divider between groups sharing one toolbar (the code pane's
+   environment buttons and its scheme toggle). */
+.preview-tools-sep {
+  width: 1px;
+  align-self: stretch;
+  background: var(--border);
+}
+.wheel-mode { display: flex; gap: 6px; }
+.code-mode { display: flex; gap: 6px; }
+.scheme-toggle { display: flex; gap: 6px; }
 .wheel-mode-btn,
-.code-mode-btn {
+.code-mode-btn,
+.scheme-btn {
   background: var(--bg-panel);
   color: var(--text-dim);
   border: 1px solid var(--border);
@@ -400,9 +413,11 @@ input[type="range"]::-moz-range-thumb {
   font-size: 12px;
 }
 .wheel-mode-btn:hover,
-.code-mode-btn:hover { border-color: var(--accent); color: var(--text); }
+.code-mode-btn:hover,
+.scheme-btn:hover { border-color: var(--accent); color: var(--text); }
 .wheel-mode-btn.active,
-.code-mode-btn.active {
+.code-mode-btn.active,
+.scheme-btn.active {
   background: var(--bg-raised);
   border-color: var(--accent);
   color: var(--text);

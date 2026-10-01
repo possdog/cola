@@ -35,7 +35,8 @@ internal/palette            state model, palette generation, view filters, theme
 static/                     UI (vanilla JS/CSS, no build step, embedded via go:embed)
 static/js/                  ES modules: app.js (entry + wiring), store.js (shared
                             mutable state), one module per concern; one file per
-                            preview tab under static/js/preview/
+                            preview tab plus shared preview helpers (scheme.js)
+                            under static/js/preview/
 ```
 
 ## Conventions
