@@ -437,7 +437,8 @@ func TestStoreConcurrentWritesAreSerialized(t *testing.T) {
 			for j := 0; j < 50; j++ {
 				st := base
 				st.Saturation = 0.5 + float64(i*50+j)/1000
-				s.store.save(st, s.currentAB())
+				_, ab := s.snapshot()
+				s.store.save(st, ab)
 			}
 		}(i)
 	}
@@ -536,9 +537,10 @@ func TestEmptyColorsFallBackToBase(t *testing.T) {
 	// A JSON empty array is a non-nil zero-length slice, so a nil check
 	// alone would let it through and render (and persist) an empty grid.
 	resp := postPalette(t, s, `{"colors":[]}`)
-	if len(resp.State.Colors) != len(s.currentBase().Colors) {
+	base, _ := s.snapshot()
+	if len(resp.State.Colors) != len(base.Colors) {
 		t.Errorf("POST with empty colors kept %d rows, want the base %d",
-			len(resp.State.Colors), len(s.currentBase().Colors))
+			len(resp.State.Colors), len(base.Colors))
 	}
 	if resp.Theme == nil {
 		t.Error("empty colors produced no theme")

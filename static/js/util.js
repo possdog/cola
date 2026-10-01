@@ -12,8 +12,11 @@ function fmt(v, digits = 3) {
   return Number(v).toFixed(digits);
 }
 
+// Quotes are escaped too because the helper also sanitizes values
+// interpolated into double-quoted HTML attributes (e.g. the wheel's
+// swatch titles, which carry client-posted color names).
 function esc(s) {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
 let toastTimer = null;

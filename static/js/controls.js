@@ -60,6 +60,9 @@ function buildColorControls() {
       `oklch(60% 0.15 ${hMin + (span * i) / segments})`
     );
     const track = `linear-gradient(90deg, ${stops.join(", ")})`;
+    // Chroma max mirrors the server's 0.4 clamp (palette.Normalized), the
+    // same UI/API agreement as the hue bounds: a state loaded with a higher
+    // value could never be shown or edited faithfully otherwise.
     const row = document.createElement("div");
     row.className = "color-row";
     row.innerHTML = `
@@ -71,7 +74,7 @@ function buildColorControls() {
       </label>
       <label class="slider-group">
         <span class="label">Chroma</span><span class="val">${fmt(c.chroma)}</span>
-        <input type="range" min="0" max="0.3" step="0.005" value="${c.chroma}">
+        <input type="range" min="0" max="0.4" step="0.005" value="${c.chroma}">
       </label>`;
     const [hueIn, chromaIn] = row.querySelectorAll("input");
     const [hueVal, chromaVal] = row.querySelectorAll(".val");

@@ -85,43 +85,45 @@ type server struct {
 	// fields a partial POST leaves out.
 	base palette.State
 	// ab is the A/B comparison record. Its active slot's snapshot always
-	// equals base (updateAB maintains that), so the two never contradict.
+	// equals base (commit maintains that), so the two never contradict.
 	ab    abState
 	store *stateStore
 }
 
-// currentBase returns a copy of the base state that shares no slice with
-// the stored one, so callers can decode requests into it safely.
-func (s *server) currentBase() palette.State {
+// snapshot returns the base state and the A/B record under one lock, so a
+// response can never mix two generations of a concurrent update. The state
+// copy shares no slice with the stored one, so callers can decode requests
+// into it safely; the record copy is shallow, which is safe because slot
+// snapshots are only ever replaced, never mutated in place.
+func (s *server) snapshot() (palette.State, abState) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	return cloneState(s.base)
+	return cloneState(s.base), s.ab
 }
 
-func (s *server) setBase(st palette.State) {
-	s.mu.Lock()
-	s.base = st
-	s.mu.Unlock()
-}
-
-// currentAB returns the stored A/B record. The copy is shallow: slot
-// snapshots are only ever replaced, never mutated in place, so the shared
-// pointers are safe for the read-only marshaling callers do.
-func (s *server) currentAB() abState {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-	return s.ab
-}
-
-// updateAB merges a request's A/B fields into the stored record and returns
-// it. The active slot's snapshot becomes the freshly posted state (it cannot
-// be staler than the palette itself); the other slot changes only when the
-// request carries a snapshot for it — swap and copy are the only such
-// moments. A request without a valid activeSlot keeps the stored active
-// slot, so plain state posts from older clients still refresh the record.
-func (s *server) updateAB(req paletteRequest, active palette.State) abState {
+// commit installs a new base state with its matching A/B record and hands
+// both to the persistence store, all under one lock acquisition. Locking
+// per step instead would let a concurrent request interleave — its base
+// could land between this request's base swap and record update — leaving
+// the active slot's snapshot contradicting the stored base (the invariant
+// the ab field documents) and persisting a torn pair.
+func (s *server) commit(req paletteRequest, st palette.State) abState {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	s.base = st
+	ab := s.updateABLocked(req, st)
+	s.store.save(st, ab)
+	return ab
+}
+
+// updateABLocked merges a request's A/B fields into the stored record and
+// returns it. The active slot's snapshot becomes the freshly posted state (it
+// cannot be staler than the palette itself); the other slot changes only when
+// the request carries a snapshot for it — swap and copy are the only such
+// moments. A request without a valid activeSlot keeps the stored active
+// slot, so plain state posts from older clients still refresh the record.
+// Callers must hold s.mu.
+func (s *server) updateABLocked(req paletteRequest, active palette.State) abState {
 	slot := req.ActiveSlot
 	if slot != "A" && slot != "B" {
 		slot = s.ab.Active
@@ -178,9 +180,10 @@ func cloneState(st palette.State) palette.State {
 }
 
 func (s *server) handlePalette(w http.ResponseWriter, r *http.Request) {
-	// Snapshot the base once per request: fetching it again below would let
-	// a concurrent reset splice new-base colors into old-base scalars.
-	base := s.currentBase()
+	// Snapshot the base and record once per request: fetching them again
+	// below would let a concurrent update splice new-base colors into
+	// old-base scalars.
+	base, baseAB := s.snapshot()
 	req := paletteRequest{State: base}
 	if r.Method == http.MethodPost {
 		// Guard against unbounded request bodies on localhost.
@@ -196,8 +199,8 @@ func (s *server) handlePalette(w http.ResponseWriter, r *http.Request) {
 	}
 	// A POST with no colors (null, missing, or an empty array) falls back to
 	// the current colors so the grid never renders empty rows. base.Colors is
-	// already a private clone (currentBase), so the state handed to the store
-	// never aliases the server's stored slice.
+	// already a private clone (see snapshot/cloneState), so the state handed
+	// to the store never aliases the server's stored slice.
 	st := req.State.Normalized()
 	if len(st.Colors) == 0 {
 		st.Colors = base.Colors
@@ -205,19 +208,15 @@ func (s *server) handlePalette(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		// The normalized state becomes the new base so a later GET (a
 		// browser refresh) and any partial POST seed from the latest
-		// palette rather than the one loaded at startup. st shares no
-		// slice with the previous base (see currentBase/cloneState), so
-		// the swap is safe without further copying.
-		s.setBase(st)
-		// Remember the palette settings and the A/B record across
-		// restarts. View filters are deliberately not part of State and
-		// so are never persisted. The store debounces the disk write.
-		ab := s.updateAB(req, st)
-		s.store.save(st, ab)
+		// palette rather than the one loaded at startup, and the A/B
+		// record plus the debounced disk write follow it in the same
+		// atomic step (see commit). View filters are deliberately not
+		// part of State and so are never persisted.
+		ab := s.commit(req, st)
 		writeJSON(w, buildResponse(st, ab, req.Filters, palette.FilterOptions{BlueLight: req.BlueLight}))
 		return
 	}
-	writeJSON(w, buildResponse(st, s.currentAB(), req.Filters, palette.FilterOptions{BlueLight: req.BlueLight}))
+	writeJSON(w, buildResponse(st, baseAB, req.Filters, palette.FilterOptions{BlueLight: req.BlueLight}))
 }
 
 // handleReset restores the built-in defaults atomically and persists them.
@@ -234,9 +233,7 @@ func (s *server) handleReset(w http.ResponseWriter, r *http.Request) {
 	}
 	req.Slots = nil
 	st := palette.DefaultState().Normalized()
-	s.setBase(st)
-	ab := s.updateAB(req, st)
-	s.store.save(st, ab)
+	ab := s.commit(req, st)
 	writeJSON(w, buildResponse(st, ab, req.Filters, palette.FilterOptions{BlueLight: req.BlueLight}))
 }
 

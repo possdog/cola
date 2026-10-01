@@ -65,7 +65,9 @@ function wheelBaseRamp(pairs) {
   return `<div class="wheel-legend"><span class="legend-name">${esc(base.col.name)}</span>${base.vcol.swatches
     .map((s, j) => {
       const real = base.col.swatches[j];
-      return `<span class="legend-swatch" style="background:${s.hex}" data-hex="${real.hex}" title="${titleFor(base.col, real)}"></span>`;
+      // esc: the title is a double-quoted attribute and the row name is
+      // client-posted, so a quote in it must not break out of the attribute.
+      return `<span class="legend-swatch" style="background:${s.hex}" data-hex="${real.hex}" title="${esc(titleFor(base.col, real))}"></span>`;
     })
     .join("")}</div>`;
 }
@@ -85,7 +87,7 @@ function renderWheelHue(pairs, n) {
       vcol.swatches.map((s, j) => {
         const real = col.swatches[j];
         const { x, y } = wheelPos(wheelRadius(j, n), s.h);
-        return `<circle class="wheel-dot" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${WHEEL.dot}" fill="${s.hex}" data-hex="${real.hex}"><title>${titleFor(col, real)}</title></circle>`;
+        return `<circle class="wheel-dot" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${WHEEL.dot}" fill="${s.hex}" data-hex="${real.hex}"><title>${esc(titleFor(col, real))}</title></circle>`;
       })
     )
     .join("");
@@ -120,7 +122,7 @@ function renderWheelFixed(pairs, n) {
       const r2 = WHEEL.rOut - j * step - bandGap;
       const r1 = WHEEL.rOut - (j + 1) * step + bandGap;
       const real = col.swatches[j];
-      bands.push(`<path class="wheel-wedge" d="${wheelSector(a1, a2, r1, r2)}" fill="${s.hex}" data-hex="${real.hex}"><title>${titleFor(col, real)}</title></path>`);
+      bands.push(`<path class="wheel-wedge" d="${wheelSector(a1, a2, r1, r2)}" fill="${s.hex}" data-hex="${real.hex}"><title>${esc(titleFor(col, real))}</title></path>`);
     });
     // Row name just outside its sector's mid-angle, the circular analogue of
     // the grid's row headers.
