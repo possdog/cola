@@ -159,13 +159,15 @@ main {
    things set it apart from the slider tracks at a glance: it bleeds to the
    panel's edges — the -14px side margins cancel .panel's padding, so the
    two must stay in sync — making it wider than every inset track, and it
-   floats with generous, symmetric clearance (~32px total on each side:
-   the element above — a slider-group or a color-row — contributes its
-   12px bottom margin) against the panels' normal 12px rhythm. */
+   floats with generous clearance against the panels' normal 12px rhythm.
+   Top and bottom margins are deliberately equal: adjacent siblings'
+   margins collapse (max wins), so the 12px bottom margin of the element
+   above joins the rule's top margin rather than adding to it — unequal
+   margins would render asymmetric clearance. */
 .divider {
   border: none;
   border-top: 1px solid var(--border);
-  margin: 20px -14px 32px;
+  margin: 20px -14px;
 }
 
 .slider-group .label { font-size: 13px; }
