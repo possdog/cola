@@ -150,15 +150,16 @@ main {
 .slider-group:last-child { margin-bottom: 2px; }
 
 /* Hairline separating the Global panel's sub-sections (base sliders, tint,
-   level distribution). The panel's normal rhythm is 12px between slider
-   groups (their own bottom margin), so this rule gets a symmetric 24px of
-   clearance on both sides — the slider-group above contributes its 12px,
-   the margins here add the rest. The gap is what reads as a break: at the
-   normal rhythm the line sits at slider height and reads as a track. */
+   level distribution). It bleeds to the panel's edges: the -14px side
+   margins cancel .panel's padding (the two must stay in sync), so the
+   rule spans edge to edge while every slider track is inset — width, not
+   color or spacing, is what sets it apart, and it is visually symmetric
+   left/right. Vertical margins keep the panel's normal 12px rhythm (the
+   slider-group above contributes its bottom margin). */
 .panel hr.divider {
   border: none;
   border-top: 1px solid var(--border);
-  margin: 12px 0 24px;
+  margin: 0 -14px 12px;
 }
 
 .slider-group .label { font-size: 13px; }
