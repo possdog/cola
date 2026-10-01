@@ -906,6 +906,11 @@ async function load() {
   bindSlider("maxL", "maxL", 3);
   bindSlider("minL", "minL", 3);
   bindSlider("saturation", "saturation", 2);
+  // Bend is centered at 0, which is the identity for the power-law skew:
+  // a zero state renders exactly the Flexoki spacing. Like the other
+  // global sliders it is part of the state, so it persists and rides
+  // along with the A/B snapshots.
+  bindSlider("bend", "bend", 2);
   buildColorControls();
   renderActive();
   applyTheme(data.theme);

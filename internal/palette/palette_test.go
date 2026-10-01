@@ -100,12 +100,70 @@ func TestNormalizedClamps(t *testing.T) {
 	s.MinL = -1
 	s.MaxL = 5
 	s.Saturation = 100
+	s.Bend = 9
 	n := s.Normalized()
 	if n.MinL < 0.02 || n.MaxL > 0.995 || n.MaxL-n.MinL < 0.1 {
 		t.Errorf("lightness not clamped: min %.3f max %.3f", n.MinL, n.MaxL)
 	}
 	if n.Saturation > 3 {
 		t.Errorf("saturation not clamped: %v", n.Saturation)
+	}
+	if n.Bend > 1 {
+		t.Errorf("bend not clamped: %v", n.Bend)
+	}
+	s.Bend = -9
+	if n2 := s.Normalized(); n2.Bend != -1 {
+		t.Errorf("negative bend not clamped: %v", n2.Bend)
+	}
+}
+
+// TestGenerateBend checks the power-law skew's contract: the anchors never
+// move, bend 0 reproduces the unbent palette, and the two directions skew
+// every intermediate level toward opposite anchors while keeping the ramp
+// strictly monotonic in lightness.
+func TestGenerateBend(t *testing.T) {
+	flat := Generate(DefaultState())
+	s := DefaultState()
+	s.Bend = 1
+	up := Generate(s)
+	s.Bend = -1
+	down := Generate(s)
+	last := len(flat.Levels) - 1
+	for i, row := range flat.Colors {
+		for j, sw := range row.Swatches {
+			upSw := up.Colors[i].Swatches[j]
+			downSw := down.Colors[i].Swatches[j]
+			if j == 0 || j == last {
+				// Levels 50 and 950 are fixed points of the power law.
+				if upSw.L != sw.L || downSw.L != sw.L {
+					t.Errorf("%s level %d moved: %v -> up %v / down %v",
+						row.Name, sw.Level, sw.L, upSw.L, downSw.L)
+				}
+				continue
+			}
+			if upSw.L <= sw.L {
+				t.Errorf("%s level %d: positive bend L %v not above flat %v",
+					row.Name, sw.Level, upSw.L, sw.L)
+			}
+			if downSw.L >= sw.L {
+				t.Errorf("%s level %d: negative bend L %v not below flat %v",
+					row.Name, sw.Level, downSw.L, sw.L)
+			}
+		}
+		// The skew must never invert the ramp's lightness order.
+		for _, bent := range []Palette{up, down} {
+			for j := 1; j < len(row.Swatches); j++ {
+				if bent.Colors[i].Swatches[j].L >= bent.Colors[i].Swatches[j-1].L {
+					t.Errorf("%s: bend inverted lightness at level %d",
+						row.Name, bent.Colors[i].Swatches[j].Level)
+				}
+			}
+		}
+	}
+	// Bend 0 is exactly the identity, not merely close to it.
+	s.Bend = 0
+	if again := Generate(s); again.Colors[0].Swatches[3].L != flat.Colors[0].Swatches[3].L {
+		t.Error("bend 0 did not reproduce the unbent palette")
 	}
 }
 

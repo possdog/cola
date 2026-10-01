@@ -435,6 +435,40 @@ func TestStoreConcurrentWritesAreSerialized(t *testing.T) {
 	}
 }
 
+func TestBendJSONContract(t *testing.T) {
+	s, _ := newTestServer(t)
+
+	// A body without bend (legacy clients or old state files) keeps the
+	// base's value, which defaults to 0 — the identity skew.
+	if got := postPalette(t, s, `{}`).State.Bend; got != 0 {
+		t.Errorf("POST without bend produced %v, want the base 0", got)
+	}
+
+	// The bend rides in the state like saturation: echoed after
+	// normalization and reflected in the generated palette.
+	resp := postPalette(t, s, `{"bend":0.5}`)
+	if resp.State.Bend != 0.5 {
+		t.Errorf("posted bend 0.5 echoed as %v", resp.State.Bend)
+	}
+	plain := postPalette(t, s, `{"bend":0}`)
+	// Level 500 sits mid-ramp, exactly where the power-law skew moves it
+	// the most; the anchors (50/950) are fixed points and never move.
+	if got, want := resp.Palette.Colors[0].Swatches[6].L, plain.Palette.Colors[0].Swatches[6].L; got == want {
+		t.Errorf("bend 0.5 left level-500 lightness unchanged (%v)", got)
+	}
+	if resp.Palette.Colors[0].Swatches[0].L != plain.Palette.Colors[0].Swatches[0].L {
+		t.Error("bend moved the level-50 anchor")
+	}
+
+	// Out-of-range bend is clamped server-side, not echoed raw.
+	if got := postPalette(t, s, `{"bend":42}`).State.Bend; got != 1 {
+		t.Errorf("bend 42 clamped to %v, want 1", got)
+	}
+	if got := postPalette(t, s, `{"bend":-42}`).State.Bend; got != -1 {
+		t.Errorf("bend -42 clamped to %v, want -1", got)
+	}
+}
+
 func TestEmptyColorsFallBackToBase(t *testing.T) {
 	s, _ := newTestServer(t)
 	// A JSON empty array is a non-nil zero-length slice, so a nil check

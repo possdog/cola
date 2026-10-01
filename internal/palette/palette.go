@@ -74,8 +74,14 @@ type State struct {
 	// MaxL is the Oklab lightness of level 50 (lightest swatches).
 	MaxL float64 `json:"maxL"`
 	// Saturation is a global multiplier applied to every color's chroma.
-	Saturation float64     `json:"saturation"`
-	Colors     []ColorSpec `json:"colors"`
+	Saturation float64 `json:"saturation"`
+	// Bend skews how the thirteen levels are distributed between the two
+	// lightness anchors, using a power-law curve: 0 keeps the Flexoki
+	// spacing, +1 bunches the intermediate steps toward the light end
+	// (finer dark shades), and -1 bunches them toward the dark end (finer
+	// light shades). See bendT.
+	Bend   float64     `json:"bend"`
+	Colors []ColorSpec `json:"colors"`
 }
 
 // Swatch is one computed color in the grid.
@@ -111,6 +117,9 @@ func DefaultState() State {
 		MinL:       0.17,
 		MaxL:       0.985,
 		Saturation: 1,
+		// Bend is the power-law skew of the luminosity distribution; 0 is
+		// the default, so the default palette keeps the Flexoki spacing.
+		Bend: 0,
 		Colors: []ColorSpec{
 			{Name: "base", Hue: 90, Chroma: 0.006},
 			{Name: "red", Hue: 30, Chroma: 0.16},
@@ -137,6 +146,7 @@ func (s State) Normalized() State {
 		out.MaxL = math.Min(0.995, out.MinL+0.1)
 	}
 	out.Saturation = clamp(s.Saturation, 0, 3)
+	out.Bend = clamp(s.Bend, -1, 1)
 	// Copy the color slice before clamping in place: ColorSpec holds only
 	// scalars, so a slice copy is a full deep copy. Without it, the writes
 	// below would mutate the caller's backing array — and anything aliasing
@@ -169,6 +179,22 @@ func taper(L float64) float64 {
 	return math.Sqrt(t)
 }
 
+// bendT skews a level's position t between the two lightness anchors with a
+// power law: the exponent is 2^bend, so bend 0 is the identity (the Flexoki
+// spacing) and each unit of bend doubles or halves the exponent, making the
+// two directions feel equally strong. Positive bend (exponent > 1) pulls
+// intermediate levels toward the light anchor, spreading the dark shades
+// across a wider range; negative bend does the opposite. t=0 and t=1 are
+// fixed points, so levels 50 and 950 stay pinned to MaxL and MinL at any
+// bend, and the curve is strictly monotonic, so the ramp's lightness order
+// can never invert.
+func bendT(t, bend float64) float64 {
+	if bend == 0 {
+		return t
+	}
+	return math.Pow(t, math.Exp2(bend))
+}
+
 // Generate computes every swatch of the palette for the given state.
 func Generate(s State) Palette {
 	s = s.Normalized()
@@ -177,7 +203,7 @@ func Generate(s State) Palette {
 		hue := cs.Hue
 		row := ColorResult{Name: cs.Name, Hue: hue}
 		for i, level := range Levels {
-			L := s.MaxL - lightT[i]*(s.MaxL-s.MinL)
+			L := s.MaxL - bendT(lightT[i], s.Bend)*(s.MaxL-s.MinL)
 			C := color.FitChroma(L, hue, cs.Chroma*s.Saturation*taper(L))
 			lab := color.LCh{L: L, C: C, H: hue}.ToLab()
 			row.Swatches = append(row.Swatches, Swatch{

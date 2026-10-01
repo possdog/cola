@@ -57,6 +57,14 @@ curl --cacert certs/localhost.crt https://127.0.0.1:8443/api/palette
 - **Lightest / darkest L** — Oklab lightness of levels 50 and 950; the eleven
   intermediate levels are distributed between them with Flexoki-style spacing
   (steps bunch toward the extremes).
+- **Bend** — power-law skew of that distribution, centered at 0 (no skew).
+  Each level's position between the two anchors is raised to the exponent
+  2^bend, so a unit of bend doubles or halves the curve's strength and both
+  directions feel equally strong. Positive bend pulls intermediate levels
+  toward the light anchor — the light steps crowd together while the dark
+  shades spread across a wider range — and negative bend does the opposite.
+  Levels 50 and 950 are fixed points of the power law, so the anchors never
+  move, and the skew can never invert the ramp's lightness order.
 - **Saturation** — global chroma multiplier.
 - **Per-color hue and chroma** — precise OKLCH values for each of the nine
   rows. Each chromatic color's hue is limited to ±30° around its ideal OKLCH
@@ -188,6 +196,7 @@ State shape:
   "minL": 0.17,
   "maxL": 0.985,
   "saturation": 1,
+  "bend": 0,
   "colors": [
     { "name": "base", "hue": 90, "chroma": 0.006 },
     { "name": "red", "hue": 30, "chroma": 0.16 }
@@ -204,7 +213,7 @@ endpoints don't look oversaturated).
 
 ```json
 {
-  "state": { "minL": 0.17, "maxL": 0.985, "saturation": 1, "colors": [] },
+  "state": { "minL": 0.17, "maxL": 0.985, "saturation": 1, "bend": 0, "colors": [] },
   "ab": { "active": "A", "slots": { "A": { "…": "the state shape above" }, "B": null } }
 }
 ```
