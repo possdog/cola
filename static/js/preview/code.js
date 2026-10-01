@@ -73,13 +73,17 @@ function codeTokenColors(hex) {
 
 // Render a tokenized sample as one HTML string per line. `match` lets a mode
 // decorate individual tokens (the terminal's search highlight): it receives
-// the line index and token, and returns extra inline CSS for matches.
+// the line index and token, and returns extra inline CSS for matches. The
+// token's own color comes first in the declaration so `extra` can override
+// it — CSS lets a duplicate property appear in one declaration and the
+// *last* one wins, so the search highlight's ink must be appended, not
+// prepended, or the token color silently replaces it.
 function codeLines(sample, colors, match) {
   return sample.map((line, li) =>
     line
       .map(([t, text]) => {
         const extra = match ? match(li, t, text) : "";
-        return `<span style="${extra}color:${colors[t] || colors.p}">${esc(text)}</span>`;
+        return `<span style="color:${colors[t] || colors.p};${extra}">${esc(text)}</span>`;
       })
       .join("")
   );
@@ -191,18 +195,16 @@ const TERM_MATCH = 14; // 1-based sample line carrying the search match
 function renderCodeTerminal(hex) {
   const tc = codeTokenColors(hex);
   const lines = codeLines(CODE_SAMPLE, tc, (li, t, text) =>
-    // Search match: the inverted pairing (light ground, dark ink) every
-    // colorscheme must keep legible. The ground is the yellow's 150 step —
-    // the bright gold end of the ramp, not the dark amber of the mid steps
-    // — with base-950 ink, the pairing a real theme's Search group rides
-    // on (~13:1). Resolved through raw hexOf, the one face-stable pairing
-    // in this pane (like the Design tab's finished art): a search
-    // highlight's identity is face-independent — light themes keep the
-    // bright-yellow chip with dark ink too — and the mechanical complement
-    // would invert the inversion into a near-black blob on the light
-    // screen.
+    // Search match: a yellow-150 ground — the ramp's bright gold end, not
+    // the dark amber of the mid steps — with the token keeping its fn blue
+    // identity at the darker blue-600 step, which holds ~5:1 on the gold.
+    // Resolved through raw hexOf, the one face-stable pairing in this pane
+    // (like the Design tab's finished art): a search highlight's identity
+    // is face-independent — light themes keep the bright-yellow chip too —
+    // and the mechanical complement would invert the chip into a
+    // near-black blob on the light screen.
     li + 1 === TERM_MATCH && t === "fn" && text === "oklch"
-      ? `background:${hexOf("yellow", 150)};color:${hexOf("base", 950)};`
+      ? `background:${hexOf("yellow", 150)};color:${hexOf("blue", 600)};`
       : ""
   );
   const rows = lines
@@ -318,7 +320,7 @@ function renderCodeAgent(hex) {
         ${toolBox("Plan", "4 items", plan, "")}
         ${say(`The highlight pins its ground to level 300. One-line change:`)}
         ${toolBox("Edit", "palette.ts", editBody, "1 line changed")}
-        ${say(`Level 150 is the ramp's bright gold — the match pops like real hlsearch, and the base-950 ink holds 13:1 on it under grayscale too.`)}
+        ${say(`Level 150 is the ramp's bright gold — the chip pops like real hlsearch, and the token keeps its blue identity at the 600 step, which holds 5:1 on it.`)}
         ${perm}
       </div>
       <div class="agent-foot" style="border-top-color:${hex("base", 800)}">

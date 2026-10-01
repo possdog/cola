@@ -186,12 +186,11 @@ at the top, and only one filter can apply at a time.
     yellow-300, constants purple-300, template interpolations magenta-400,
     comments base-500) on a base-950 editor background.
   - *Terminal* — a Neovim-style TUI over the same tokenized sample: a
-    cursorline with cyan-400 line number, a search match inverted onto its
-    yellow-150 ground (the ramp's bright gold end, so the match pops like a
-    real theme's Search group) with base-950 ink — the one face-stable
-    pairing in the pane, since a search highlight keeps its bright
-    ground/dark ink identity on light screens too, a `:Colorscheme`
-    completion popup
+    cursorline with cyan-400 line number, a search match on a yellow-150
+    ground (the ramp's bright gold end) whose token keeps its fn blue
+    identity at the darker blue-600 step, ~5:1 on the gold — the one
+    face-stable pairing in the pane, since a search highlight keeps its
+    identity on light screens too, a `:Colorscheme` completion popup
     whose selected row is cyan-600 on level-50 ink, and a lualine-style
     statusline (blue-600 NORMAL block, green branch, red/yellow diagnostics).
   - *Agent* — a coding-agent chat TUI: a cyan-branded banner, Read/Plan/Edit
