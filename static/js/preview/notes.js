@@ -1,5 +1,7 @@
 // Notes preview tab: a note-taking app mock demonstrating the standard
-// light-UI pairings every ramp must provide.
+// pairings every ramp must provide. Authored as an all-light UI — the
+// pane's Light/Dark toggle complements every level for the all-dark face,
+// so the app never renders as a mixed light/dark split.
 
 import { store } from "../store.js";
 import { $, esc } from "../util.js";
@@ -18,14 +20,19 @@ const NOTES_TAGS = [
 ];
 
 export function renderNotes() {
-  // Scheme-bound lookups: the mock is authored as a light UI, and the toggle
-  // complements every level so the whole app flips to its dark face.
+  // Scheme-bound lookups: the mock is authored as an all-light UI, and the
+  // toggle complements every level so the whole app flips to its all-dark
+  // face.
   const hex = hexFor("notes");
   const lvl = (n) => levelFor("notes", n);
   const tag = ([name, label]) =>
     `<span class="tag" style="background:${hex(name, 100)};color:${hex(name, 800)}">${label}</span>`;
+  // Sidebar items carry their own ink rather than inheriting the app
+  // theme's text color: the app chrome is a dark UI, and its light ink
+  // would vanish on the light face's base-100 sidebar. The active entry
+  // is the raised pairing — a 200 ground with 950 ink and a cyan edge.
   const noteItem = (label, active = false) =>
-    `<div class="notes-item${active ? " active" : ""}"${active ? ` style="background:${hex("base", 800)};color:${hex("base", 50)};border-left-color:${hex("cyan", 400)}"` : ""}>${label}</div>`;
+    `<div class="notes-item${active ? " active" : ""}" style="color:${hex("base", active ? 950 : 700)};${active ? `background:${hex("base", 200)};border-left-color:${hex("cyan", 600)}` : ""}">${label}</div>`;
 
   // One card per chromatic row, named from the live palette so a renamed row
   // keeps its real label; hex grays out the chips if a level goes missing.
@@ -51,9 +58,9 @@ export function renderNotes() {
   $("#notes-preview").innerHTML = `
     <div class="preview-tools">${schemeToggle("notes")}</div>
     <div class="notes-app">
-      <aside class="notes-side" style="background:${hex("base", 900)}">
-        <div class="notes-search" style="background:${hex("base", 800)};border-color:${hex("base", 700)};color:${hex("base", 400)}">Search notes…</div>
-        <div class="notes-side-head" style="color:${hex("base", 200)}">Cola vault</div>
+      <aside class="notes-side" style="background:${hex("base", 100)}">
+        <div class="notes-search" style="background:${hex("base", 200)};border-color:${hex("base", 300)};color:${hex("base", 600)}">Search notes…</div>
+        <div class="notes-side-head" style="color:${hex("base", 800)}">Cola vault</div>
         <div class="notes-group" style="color:${hex("base", 500)}">Design</div>
         ${noteItem("Palette review", true)}
         ${noteItem("Swatch audit")}
@@ -61,7 +68,7 @@ export function renderNotes() {
         <div class="notes-group" style="color:${hex("base", 500)}">Research</div>
         ${noteItem("Oklab notes")}
         ${noteItem("Flexoki teardown")}
-        <div class="notes-new" style="background:${hex("cyan", 600)};color:${hex("base", 50)}">New note</div>
+        <div class="notes-new" style="background:${hex("cyan", 400)};color:${hex("base", 950)}">New note</div>
       </aside>
       <div class="notes-editor" style="background:${hex("base", 50)};color:${hex("base", 900)}">
         <div class="notes-title" style="color:${hex("base", 950)}">Palette review</div>

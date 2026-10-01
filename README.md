@@ -203,12 +203,14 @@ at the top, and only one filter can apply at a time.
     prompt with the green-allow / red-deny / cyan-always options, a token
     meter, and an input line — the semantic pairs (add vs delete, allow vs
     deny) an agent UI must never let blur together.
-- **Notes** — an Obsidian-style note app: dark file sidebar with a search
-  field and a cyan "New note" button, light editor, tag pills in several
-  hues, inline code and highlight spans, a checklist, an orange callout,
-  wikilinks, and blue backlinks. A "Pairings" section renders one card per
-  chromatic row showing its two standard pairings — level-800 ink on the
-  row's level-100 ground, and its 400 step on base-950 (dark mode).
+- **Notes** — an Obsidian-style note app, uniform per face under the pane's
+  Light/Dark toggle (an all-light app or an all-dark one, never the mixed
+  dark-sidebar/light-editor split): file sidebar with a search field and a
+  cyan "New note" button, editor, tag pills in several hues, inline code
+  and highlight spans, a checklist, an orange callout, wikilinks, and blue
+  backlinks. A "Pairings" section renders one card per chromatic row
+  showing its two standard pairings — level-800 ink on the row's level-100
+  ground, and its 400 step on base-950.
 - **Landing** — a landing page for a fictional company ("Kroma") that walks
   the ramps through every register a brand needs: nav, hero, a strip of the
   live cyan ramp, and feature cards on the light end; an announcement ribbon
