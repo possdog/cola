@@ -1,5 +1,7 @@
 # Cola
 
+> 🤖 This code was written by a human-led AI agent.
+
 A web-based designer for UI-ready color palettes, modeled on the structure of
 [Flexoki](https://stephango.com/flexoki): nine colors (base, red, orange,
 yellow, green, cyan, blue, purple, magenta), each sampled at thirteen
