@@ -80,14 +80,14 @@ type stateStore struct {
 }
 
 // newStateStore creates a store around an initial (already normalized)
-// record. Scheduling a save for an identical record is a no-op, so
-// filter-only updates never touch the disk.
+// record.
 func newStateStore(path string, initial persistedState) *stateStore {
 	return &stateStore{path: path, delay: saveDelay, pending: initial}
 }
 
 // save records the state and A/B record to persist, (re)starting the debounce
-// window.
+// window. Scheduling a save for an identical record is a no-op, so
+// filter-only updates never touch the disk.
 func (s *stateStore) save(st palette.State, ab abState) {
 	s.mu.Lock()
 	defer s.mu.Unlock()

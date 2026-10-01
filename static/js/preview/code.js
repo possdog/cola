@@ -185,7 +185,7 @@ function renderCodeGraphical(hex) {
 // search match, completion selection row, statusline mode blocks — drawn
 // from the same ramps the GUI theme used.
 const TERM_CURSOR = 15; // 1-based sample line the cursorline sits on
-const TERM_MATCH = 13; // 1-based sample line carrying the search match
+const TERM_MATCH = 14; // 1-based sample line carrying the search match
 
 function renderCodeTerminal(hex) {
   const tc = codeTokenColors(hex);
