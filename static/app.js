@@ -297,13 +297,24 @@ function wheelLevelLabels(n) {
     .join("");
 }
 
+// Base legend ramp, shared by both layouts: the near-neutral base row has
+// no meaningful hue, so instead of a position on the wheel it renders as its
+// ramp below the wheel.
+function wheelBaseRamp(pairs) {
+  const base = pairs.find((p) => p.vcol.name === "base");
+  if (!base) return "";
+  return `<div class="wheel-legend"><span class="legend-name">${esc(base.col.name)}</span>${base.vcol.swatches
+    .map((s, j) => {
+      const real = base.col.swatches[j];
+      return `<span class="legend-swatch" style="background:${s.hex}" data-hex="${real.hex}" title="${titleFor(base.col, real)}"></span>`;
+    })
+    .join("")}</div>`;
+}
+
 // "hue" mode: a dot per swatch at its actual hue angle, so each chromatic
 // row reads as a spoke and hue coverage — or a gap — shows at a glance.
-// The near-neutral base row's hue is unconstrained, so a wheel angle for it
-// would be arbitrary; it renders as a legend ramp below the wheel instead.
 function renderWheelHue(pairs, n) {
   const spokes = pairs.filter((p) => p.vcol.name !== "base");
-  const base = pairs.find((p) => p.vcol.name === "base");
   // One faint ring per level: a ring is one fixed Oklab lightness, so under
   // the grayscale filter each ring should collapse to one uniform gray —
   // the same check the grid's columns provide.
@@ -319,25 +330,18 @@ function renderWheelHue(pairs, n) {
       })
     )
     .join("");
-  const baseRamp = base
-    ? `<div class="wheel-legend"><span class="legend-name">${esc(base.col.name)}</span>${base.vcol.swatches
-        .map((s, j) => {
-          const real = base.col.swatches[j];
-          return `<span class="legend-swatch" style="background:${s.hex}" data-hex="${real.hex}" title="${titleFor(base.col, real)}"></span>`;
-        })
-        .join("")}</div>`
-    : "";
   return {
     svg: `${rings}${wheelLevelLabels(n)}${dots}`,
-    below: `${baseRamp}<p class="wheel-hint">Angle is OKLCH hue; radius is level (50 at the rim, 950 at the center). Click any swatch to copy its hex.</p>`,
+    below: `${wheelBaseRamp(pairs)}<p class="wheel-hint">Angle is OKLCH hue; radius is level (50 at the rim, 950 at the center). Click any swatch to copy its hex.</p>`,
   };
 }
 
-// "fixed" mode: the grid rolled into a circle. Every row — base included, in
-// grid order — gets an equal sector, and each sector's thirteen concentric
-// bands are its levels, 50 at the rim and 950 at the center. Equal levels
-// share a radius, so adjacent hues compare directly along any ring, and the
-// arrangement never moves no matter where the hue sliders are.
+// "fixed" mode: the grid rolled into a circle. Each chromatic row gets an
+// equal sector in grid order, and each sector's thirteen concentric bands
+// are its levels, 50 at the rim and 950 at the center. Equal levels share a
+// radius, so adjacent hues compare directly along any ring, and the
+// arrangement never moves no matter where the hue sliders are. The base row
+// sits below the wheel (see wheelBaseRamp), exactly like in hue mode.
 function renderWheelFixed(pairs, n) {
   // Bands tile [rOut, rIn] evenly (n bands of step each), unlike hue mode's
   // dots, which sit on n rings with the innermost at rIn.
@@ -346,10 +350,11 @@ function renderWheelFixed(pairs, n) {
   // Angular hairline between rows, ~3px at the rim — the same separation as
   // the grid's cell gap — tapering to a hairline toward the center.
   const sectorGap = 0.4;
-  const sector = 360 / pairs.length;
+  const sectors = pairs.filter((p) => p.vcol.name !== "base");
+  const sector = 360 / sectors.length;
   const bands = [];
   const names = [];
-  pairs.forEach(({ vcol, col }, i) => {
+  sectors.forEach(({ vcol, col }, i) => {
     const a1 = i * sector + sectorGap;
     const a2 = (i + 1) * sector - sectorGap;
     vcol.swatches.forEach((s, j) => {
@@ -365,7 +370,7 @@ function renderWheelFixed(pairs, n) {
   });
   return {
     svg: `${bands.join("")}${names.join("")}`,
-    below: `<p class="wheel-hint">Each sector is one color in grid order; radius is level (50 at the rim, 950 at the center). Click any swatch to copy its hex.</p>`,
+    below: `${wheelBaseRamp(pairs)}<p class="wheel-hint">Each sector is one color in grid order; radius is level (50 at the rim, 950 at the center). Click any swatch to copy its hex.</p>`,
   };
 }
 

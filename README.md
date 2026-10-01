@@ -94,15 +94,15 @@ at the top, and only one filter can apply at a time.
     (50 at the rim, 950 at the center), so each chromatic row reads as a
     spoke and hue coverage or gaps show at a glance. The faint rings are
     the fixed-lightness levels — under the grayscale filter each ring,
-    like each grid column, should collapse to one uniform gray. The
-    near-neutral base row's hue is unconstrained, so it appears as a
-    legend ramp under the wheel instead of a misleading spoke.
-  - *Fixed* — the grid rolled into a circle: every row (base included, in
-    grid order) gets an equal sector, with its thirteen levels as
-    concentric bands (50 at the rim, 950 at the center). Adjacent hues sit
-    side by side at every level, and the arrangement never moves no matter
-    where the hue sliders are.
-  Click any swatch in either layout to copy its hex.
+    like each grid column, should collapse to one uniform gray.
+  - *Fixed* — the grid rolled into a circle: each chromatic row, in grid
+    order, gets an equal sector, with its thirteen levels as concentric
+    bands (50 at the rim, 950 at the center). Adjacent hues sit side by
+    side at every level, and the arrangement never moves no matter where
+    the hue sliders are.
+  In both layouts the near-neutral base row — whose hue is unconstrained —
+  appears as a legend ramp under the wheel instead of a wheel position.
+  Click any swatch to copy its hex.
 - **Code** — a syntax-highlighted TypeScript sample in a mock editor. Token
   classes map to palette rows (keywords red-400, types cyan-400, functions
   blue-400, strings green-400, numbers orange-400, properties yellow-300,
