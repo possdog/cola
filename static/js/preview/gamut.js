@@ -24,6 +24,14 @@ let drawQueued = false;
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
+// Chroma is drawn ~2.2x its raw OKLCH scale relative to lightness. Honest
+// units make the palette a tall, thin spindle (chroma tops out near 0.4
+// while lightness spans almost 1.0); exaggerating the horizontal axes
+// widens the scene around the center so the default palette's silhouette
+// reads closer to a sphere. Display-only geometry, like the wheel's fixed
+// layout: it rescales positions, never the plotted values themselves.
+const CHROMA_SCALE = 2.2;
+
 // One dot per swatch, one path per chromatic row, plus the per-level chroma
 // envelope rings and the lightness axis. The base row is included: its chroma
 // is near zero, so it renders as the neutral spine of the visualization —
@@ -39,9 +47,10 @@ function sceneData() {
       // same convention as the wheel. Height is Oklab L centered at 0.5 so
       // the scene's origin is its own midpoint.
       const a = (s.h * Math.PI) / 180;
+      const r = s.c * CHROMA_SCALE;
       const dot = {
-        x: s.c * Math.sin(a),
-        y: s.c * Math.cos(a),
+        x: r * Math.sin(a),
+        y: r * Math.cos(a),
         z: s.l - 0.5,
         hex: s.hex,
         realHex: real.hex,
@@ -66,7 +75,7 @@ function sceneData() {
     let z = 0;
     for (const { vcol } of chrom) {
       const s = vcol.swatches[j];
-      r = Math.max(r, s.c);
+      r = Math.max(r, s.c * CHROMA_SCALE);
       z = s.l - 0.5;
     }
     return { r, z };
@@ -361,7 +370,7 @@ export function renderGamut() {
   if (!canvas) {
     pane.innerHTML = `
       <canvas id="gamut-canvas" role="img" aria-label="Palette gamut in OKLCH space"></canvas>
-      <p class="gamut-hint">OKLCH space: angle is hue, radius is chroma, height is lightness (level ${store.palette.levels[0]} at the top). Drag to rotate, scroll to zoom, click a swatch to copy its hex, double-click empty space to reset the view.</p>`;
+      <p class="gamut-hint">OKLCH space: angle is hue, radius is chroma (exaggerated 2.2x for legibility), height is lightness (level ${store.palette.levels[0]} at the top). Drag to rotate, scroll to zoom, click a swatch to copy its hex, double-click empty space to reset the view.</p>`;
     canvas = pane.querySelector("canvas");
     canvasEl = canvas;
     attachGamutControls(canvas);

@@ -145,6 +145,11 @@ at the top, and only one filter can apply at a time.
 - **Gamut** — an interactive plot of the palette in OKLCH space on a canvas
   renderer (no libraries, no build step): angle is hue, radius is chroma,
   and height is Oklab lightness, with level 50 at the top of the axis.
+  Chroma is drawn exaggerated 2.2x relative to lightness — a display-only
+  rescale of positions, never of the plotted values — because honest units
+  make the palette a tall thin spindle (chroma tops out near 0.4 while
+  lightness spans almost 1.0); the exaggeration widens the scene around the
+  center so the silhouette reads closer to a sphere.
   Every swatch is a dot, each chromatic row is traced by a path (the ramp's
   characteristic rise-and-fall of chroma across levels), and the faint rings
   are the per-level chroma envelope — the palette's own gamut outline, which
