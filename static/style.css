@@ -150,13 +150,17 @@ main {
 .slider-group:last-child { margin-bottom: 2px; }
 
 /* Hairline separating the Global panel's sub-sections (base sliders, tint,
-   level distribution). The 1px top border matches the other rules in the
-   app; margins only add space below, since the slider-group above already
-   contributes its own bottom margin. */
+   level distribution). Short and dimmer than the panel's own borders on
+   purpose: a full-width rule reads as just another slider track at a
+   glance, while a small left-aligned dash breaks that visual parallel.
+   Margins only add a little extra space beyond the slider-group above. */
 .panel hr.divider {
   border: none;
-  border-top: 1px solid var(--border);
-  margin: 2px 0 10px;
+  width: 40px;
+  height: 1px;
+  background: var(--border);
+  opacity: 0.7;
+  margin: 4px 0 12px;
 }
 
 .slider-group .label { font-size: 13px; }
