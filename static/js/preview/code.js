@@ -191,9 +191,12 @@ function renderCodeTerminal(hex) {
   const tc = codeTokenColors(hex);
   const lines = codeLines(CODE_SAMPLE, tc, (li, t, text) =>
     // Search match: the inverted pairing (light ground, dark ink) every
-    // colorscheme must keep legible, here yellow-300 onto base-950 ink.
+    // colorscheme must keep legible. The ground is the yellow's 150 step —
+    // the bright gold end of the ramp, not the dark amber of the mid steps
+    // — so the match pops as *the* yellow with ~13:1 against the base-950
+    // ink, the pairing a real theme's Search group rides on.
     li + 1 === TERM_MATCH && t === "fn" && text === "oklch"
-      ? `background:${hex("yellow", 300)};color:${hex("base", 950)};`
+      ? `background:${hex("yellow", 150)};color:${hex("base", 950)};`
       : ""
   );
   const rows = lines
@@ -263,8 +266,8 @@ function renderCodeAgent(hex) {
   const diff = (sign, text, row) =>
     `<span class="tline" style="background:${hex(row, 950)};color:${hex(row, 400)}">${sign} ${text}</span>`;
   const editBody = [
-    diff("-", 'const GROUND = level("yellow", 200);', "red"),
-    diff("+", 'const GROUND = level("yellow", 300);', "green"),
+    diff("-", 'const GROUND = level("yellow", 300);', "red"),
+    diff("+", 'const GROUND = level("yellow", 150);', "green"),
   ].join("");
 
   // Plan box: done items checked in green, the running one marked in
@@ -274,7 +277,7 @@ function renderCodeAgent(hex) {
   const plan = [
     todoRow("x", hex("green", 400), "Locate the search highlight definition", hex("base", 400)),
     todoRow("x", hex("green", 400), "Re-check the pairing under grayscale", hex("base", 400)),
-    todoRow(">", hex("yellow", 400), "Swap level 200 for level 300 in palette.ts", hex("base", 100)),
+    todoRow(">", hex("yellow", 400), "Swap level 300 for level 150 in palette.ts", hex("base", 100)),
     todoRow(" ", hex("base", 600), "Verify contrast stays above 4.5:1", hex("base", 300)),
   ].join("");
 
@@ -303,13 +306,13 @@ function renderCodeAgent(hex) {
           <span class="grow"></span>
           <span style="color:${hex("base", 600)}">cola/palette</span>
         </div>
-        <div class="agent-user"><span style="color:${hex("magenta", 400)}">></span><span style="color:${hex("base", 100)}">The search highlight reads thin — can we use level 300 instead of 200?</span></div>
-        ${say(`The 200 ground keeps its chroma but loses contrast against the ink. Checking the definition in ${ref("palette.ts")} first.`)}
+        <div class="agent-user"><span style="color:${hex("magenta", 400)}">></span><span style="color:${hex("base", 100)}">The search highlight reads muddy — can we use level 150 instead of 300?</span></div>
+        ${say(`The 300 ground is a dark amber — the match sinks into the editor next to the tokens it covers. Checking the definition in ${ref("palette.ts")} first.`)}
         ${toolBox("Read", "palette.ts (1-29)", readBody, "29 lines")}
         ${toolBox("Plan", "4 items", plan, "")}
-        ${say(`The highlight pins its ground to level 200. One-line change:`)}
+        ${say(`The highlight pins its ground to level 300. One-line change:`)}
         ${toolBox("Edit", "palette.ts", editBody, "1 line changed")}
-        ${say(`Level 300 keeps the yellow's chroma and stays the darkest cell in its row under grayscale — the pairing holds.`)}
+        ${say(`Level 150 is the ramp's bright gold — the match pops like real hlsearch, and the base-950 ink holds 13:1 on it under grayscale too.`)}
         ${perm}
       </div>
       <div class="agent-foot" style="border-top-color:${hex("base", 800)}">
