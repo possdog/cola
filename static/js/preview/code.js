@@ -3,6 +3,7 @@
 // colored entirely from the palette through a scheme-bound hexOf lookup.
 
 import { $, esc, setPaneHTML } from "../util.js";
+import { hexOf } from "../swatch.js";
 import { hexFor } from "./scheme.js";
 
 // Code preview modes, modeled on the three environments a palette ships in:
@@ -193,10 +194,15 @@ function renderCodeTerminal(hex) {
     // Search match: the inverted pairing (light ground, dark ink) every
     // colorscheme must keep legible. The ground is the yellow's 150 step —
     // the bright gold end of the ramp, not the dark amber of the mid steps
-    // — so the match pops as *the* yellow with ~13:1 against the base-950
-    // ink, the pairing a real theme's Search group rides on.
+    // — with base-950 ink, the pairing a real theme's Search group rides
+    // on (~13:1). Resolved through raw hexOf, the one face-stable pairing
+    // in this pane (like the Design tab's finished art): a search
+    // highlight's identity is face-independent — light themes keep the
+    // bright-yellow chip with dark ink too — and the mechanical complement
+    // would invert the inversion into a near-black blob on the light
+    // screen.
     li + 1 === TERM_MATCH && t === "fn" && text === "oklch"
-      ? `background:${hex("yellow", 150)};color:${hex("base", 950)};`
+      ? `background:${hexOf("yellow", 150)};color:${hexOf("base", 950)};`
       : ""
   );
   const rows = lines
