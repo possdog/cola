@@ -89,9 +89,18 @@ type State struct {
 	// slider position keeps a useful, strictly monotonic ramp.
 	// PinchCenter is the point's position between the anchors (0 = level
 	// 50, 1 = level 950). See pinchAt.
-	Pinch       float64     `json:"pinch"`
-	PinchCenter float64     `json:"pinchCenter"`
-	Colors      []ColorSpec `json:"colors"`
+	Pinch       float64 `json:"pinch"`
+	PinchCenter float64 `json:"pinchCenter"`
+	// TintHue, TintL, and TintChroma describe one OKLCH color that gets mixed
+	// into every swatch; TintIntensity is the mix fraction in [0,1] (0 keeps
+	// the untinted palette, 1 replaces every swatch with the tint). The
+	// first three only matter once the intensity departs from 0.
+	TintHue       float64 `json:"tintHue"`
+	TintL         float64 `json:"tintL"`
+	TintChroma    float64 `json:"tintChroma"`
+	TintIntensity float64 `json:"tintIntensity"`
+	// Colors is the per-row spec list.
+	Colors []ColorSpec `json:"colors"`
 }
 
 // Swatch is one computed color in the grid.
@@ -134,6 +143,14 @@ func DefaultState() State {
 		Bend:        0,
 		Pinch:       0,
 		PinchCenter: 0.5,
+		// The tint color's own coordinates are arbitrary but chosen to read
+		// as a pleasant warm red at mid lightness; only the zero intensity
+		// (tint off) is load-bearing as the default, keeping the default
+		// palette exactly the untinted one.
+		TintHue:       30,
+		TintL:         0.55,
+		TintChroma:    0.12,
+		TintIntensity: 0,
 		Colors: []ColorSpec{
 			{Name: "base", Hue: 90, Chroma: 0.006},
 			{Name: "red", Hue: 30, Chroma: 0.16},
@@ -163,6 +180,15 @@ func (s State) Normalized() State {
 	out.Bend = clamp(s.Bend, -1, 1)
 	out.Pinch = clamp(s.Pinch, -0.5, 0.5)
 	out.PinchCenter = clamp(s.PinchCenter, 0, 1)
+	// The tint mirrors the per-color clamps: the same [0,0.4] chroma cap,
+	// and lightness bounds matching the anchors' so the tint is always
+	// representable in sRGB at some chroma. Zero values (a legacy state
+	// file written before the tint feature) clamp to a near-black tint,
+	// which is fine: intensity 0 keeps it out of the palette entirely.
+	out.TintHue = clamp(s.TintHue, 0, 360)
+	out.TintL = clamp(s.TintL, 0.02, 0.995)
+	out.TintChroma = clamp(s.TintChroma, 0, 0.4)
+	out.TintIntensity = clamp(s.TintIntensity, 0, 1)
 	// Copy the color slice before clamping in place: ColorSpec holds only
 	// scalars, so a slice copy is a full deep copy. Without it, the writes
 	// below would mutate the caller's backing array — and anything aliasing
@@ -267,23 +293,57 @@ func levelT(t float64, s State) float64 {
 	return pinchAt(bendT(t, s.Bend), s.Pinch, s.PinchCenter)
 }
 
+// tintMix blends one swatch toward the tint color. The mix itself runs in
+// Oklab, where a straight line is the perceptual gradient between two
+// colors, and every swatch at a level shares the same base L, so the mixed
+// L — (1-k)·L + k·tint.L — is still identical across hues: tinting preserves
+// the palette's core guarantee of equal perceived lightness per level.
+// Oklab interpolation can leave the sRGB gamut, so the mix is re-fitted in
+// OKLCH — lightness and hue of the mix held fixed, chroma reduced until it
+// fits — the same discipline the untinted swatch already gets. k=0 must
+// short-circuit: the OKLCH round trip below is algebraically the identity
+// but not bit-identical, and an untinted state has to reproduce the
+// tint-free palette exactly.
+func tintMix(c color.LCh, tint color.Lab, k float64) color.LCh {
+	if k == 0 {
+		return c
+	}
+	lab := c.ToLab()
+	m := color.Lab{
+		L: lab.L + (tint.L-lab.L)*k,
+		A: lab.A + (tint.A-lab.A)*k,
+		B: lab.B + (tint.B-lab.B)*k,
+	}.ToLCh()
+	m.C = color.FitChroma(m.L, m.H, m.C)
+	return m
+}
+
 // Generate computes every swatch of the palette for the given state.
 func Generate(s State) Palette {
 	s = s.Normalized()
 	p := Palette{Levels: Levels}
+	// The tint is fitted to the gamut once up front, so the mix target is
+	// itself an sRGB color; a chroma or lightness the display can't show
+	// would otherwise bleed into every swatch via the mix fraction.
+	tint := color.LCh{
+		L: s.TintL,
+		C: color.FitChroma(s.TintL, s.TintHue, s.TintChroma),
+		H: s.TintHue,
+	}.ToLab()
 	for _, cs := range s.Colors {
 		hue := cs.Hue
 		row := ColorResult{Name: cs.Name, Hue: hue}
 		for i, level := range Levels {
 			L := s.MaxL - levelT(lightT[i], s)*(s.MaxL-s.MinL)
 			C := color.FitChroma(L, hue, cs.Chroma*s.Saturation*taper(L))
-			lab := color.LCh{L: L, C: C, H: hue}.ToLab()
+			c := tintMix(color.LCh{L: L, C: C, H: hue}, tint, s.TintIntensity)
+			lab := c.ToLab()
 			row.Swatches = append(row.Swatches, Swatch{
 				Level: level,
 				Hex:   lab.Hex(),
-				L:     L,
-				C:     C,
-				H:     hue,
+				L:     c.L,
+				C:     c.C,
+				H:     c.H,
 				Y:     lab.RelativeLuminance(),
 			})
 		}

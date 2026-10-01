@@ -5,6 +5,8 @@ import (
 	"math"
 	"regexp"
 	"testing"
+
+	"cola/internal/color"
 )
 
 var hexRE = regexp.MustCompile(`^#[0-9a-f]{6}$`)
@@ -132,6 +134,23 @@ func TestNormalizedClamps(t *testing.T) {
 	}
 	if n4.PinchCenter != 1 {
 		t.Errorf("pinch center not clamped from above: %v", n4.PinchCenter)
+	}
+	// The tint mirrors the per-color chroma cap and the anchors' lightness
+	// bounds; the hue covers the full circle.
+	s.TintHue = -5
+	s.TintL = 5
+	s.TintChroma = 9
+	s.TintIntensity = 9
+	n5 := s.Normalized()
+	if n5.TintHue != 0 || n5.TintL != 0.995 || n5.TintChroma != 0.4 || n5.TintIntensity != 1 {
+		t.Errorf("tint not clamped from above: hue %v L %v C %v k %v",
+			n5.TintHue, n5.TintL, n5.TintChroma, n5.TintIntensity)
+	}
+	s.TintL = -1
+	s.TintIntensity = -1
+	n6 := s.Normalized()
+	if n6.TintL != 0.02 || n6.TintIntensity != 0 {
+		t.Errorf("tint not clamped from below: L %v k %v", n6.TintL, n6.TintIntensity)
 	}
 }
 
@@ -269,6 +288,64 @@ func TestGenerateBend(t *testing.T) {
 	s.Bend = 0
 	if again := Generate(s); again.Colors[0].Swatches[3].L != flat.Colors[0].Swatches[3].L {
 		t.Error("bend 0 did not reproduce the unbent palette")
+	}
+}
+
+// TestGenerateTint checks the tint's contract through Generate: intensity 0
+// reproduces the untinted palette exactly no matter the tint color, intensity
+// 1 collapses every swatch onto the gamut-fitted tint itself, and an
+// intermediate intensity pulls every swatch's lightness to the mix point
+// while keeping each level's lightness equal across hues.
+func TestGenerateTint(t *testing.T) {
+	plain := Generate(DefaultState())
+
+	// Intensity 0 is the exact identity, whatever the tint color is.
+	s := DefaultState()
+	s.TintHue, s.TintL, s.TintChroma = 200, 0.4, 0.3
+	if got := Generate(s); got.Colors[3].Swatches[5].Hex != plain.Colors[3].Swatches[5].Hex {
+		t.Error("tint intensity 0 changed the palette")
+	}
+
+	// Full intensity replaces every swatch with the fitted tint; the tint
+	// itself is gamut-fitted, so its hex is what a swatch must land on.
+	s.TintIntensity = 1
+	tinted := Generate(s)
+	wantHex := color.LCh{
+		L: s.TintL,
+		C: color.FitChroma(s.TintL, s.TintHue, s.TintChroma),
+		H: s.TintHue,
+	}.ToLab().Hex()
+	for _, row := range tinted.Colors {
+		for _, sw := range row.Swatches {
+			if sw.Hex != wantHex {
+				t.Errorf("%s level %d: full tint gave %s, want the tint %s",
+					row.Name, sw.Level, sw.Hex, wantHex)
+			}
+		}
+	}
+
+	// Half intensity: the mixed lightness sits exactly at the mix point of
+	// the level's base L and the tint's L (chroma fitting holds L fixed),
+	// and it is shared by every row at that level — the tint preserves the
+	// equal-perceived-lightness-per-level guarantee.
+	s.TintIntensity = 0.5
+	half := Generate(s)
+	for i, row := range plain.Colors {
+		for j, sw := range row.Swatches {
+			got := half.Colors[i].Swatches[j]
+			if want := (sw.L + s.TintL) / 2; math.Abs(got.L-want) > 1e-9 {
+				t.Errorf("%s level %d: tinted L %v, want the mix point %v",
+					row.Name, sw.Level, got.L, want)
+			}
+		}
+	}
+	for j := range plain.Levels {
+		for _, row := range half.Colors[1:] {
+			if row.Swatches[j].L != half.Colors[0].Swatches[j].L {
+				t.Errorf("level %d: tint broke equal lightness across hues (%v vs %v)",
+					row.Swatches[j].Level, row.Swatches[j].L, half.Colors[0].Swatches[j].L)
+			}
+		}
 	}
 }
 

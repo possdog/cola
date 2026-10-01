@@ -11,18 +11,22 @@ import { update } from "./api.js";
 // restored defaults without re-attaching their input listeners.
 const globalSync = [];
 
-function bindSlider(id, key, digits) {
+// format is optional; the default fixed-precision fmt covers every global
+// slider, but a plain number is a poor label for some values (the tint hue
+// reads as "30°", like the per-color hue rows).
+function bindSlider(id, key, digits, format) {
+  const show = format || ((v) => fmt(v, digits));
   const input = $(`#${id}`);
   const val = $(`#${id}-val`);
   const sync = () => {
     input.value = store.state[key];
-    val.textContent = fmt(store.state[key], digits);
+    val.textContent = show(store.state[key]);
   };
   sync();
   globalSync.push(sync);
   input.addEventListener("input", () => {
     store.state[key] = Number(input.value);
-    val.textContent = fmt(input.value, digits);
+    val.textContent = show(input.value);
     update();
   });
   // Double-click snaps the slider back to the default Reset to defaults

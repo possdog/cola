@@ -187,8 +187,9 @@ input[type="range"]::-moz-range-thumb {
   cursor: pointer;
 }
 
-/* Hue slider tracks get an inline gradient from app.js showing the exact
-   hue window each color is allowed to span. */
+/* Hue slider tracks get an inline gradient showing the hues they span: the
+   per-color rows from app.js (the exact window each color is allowed to
+   span), the tint hue statically from index.html (the full circle). */
 
 .hint-block {
   margin: 0 0 10px;

@@ -79,6 +79,18 @@ curl --cacert certs/localhost.crt https://127.0.0.1:8443/api/palette
   pinch is 0. The pinch runs after the bend, so the pinch center names a spot
   in the final distribution: the step at that spot stays exactly there.
 - **Saturation** — global chroma multiplier.
+- **Tint hue / luminosity / chroma / intensity** — mixes one fixed color
+  into every swatch of the palette. The first three pick the tint in OKLCH
+  (the same space as everything else; the default is a warm red at mid
+  lightness), and the intensity is the mix fraction from 0 (off — the
+  default, leaving the palette untouched) to 1 (every swatch becomes the
+  tint). The mix runs in Oklab, where a straight line between two colors is
+  the perceptual gradient, and every swatch at a level starts from the same
+  lightness, so the mixed lightness — pulled toward the tint's by the same
+  fraction everywhere — is still identical across hues: tinting preserves
+  the equal-perceived-lightness-per-level guarantee. A mix can leave the
+  sRGB gamut; it is chroma-fitted at the mixed lightness and hue, the same
+  discipline every other swatch gets.
 - **Per-color hue and chroma** — precise OKLCH values for each of the nine
   rows. Each chromatic color's hue is limited to ±30° around its ideal OKLCH
   center, so red stays recognizably red. (Oklab hue differs from HSL: hue 0
@@ -323,6 +335,10 @@ State shape:
   "bend": 0,
   "pinch": 0,
   "pinchCenter": 0.5,
+  "tintHue": 30,
+  "tintL": 0.55,
+  "tintChroma": 0.12,
+  "tintIntensity": 0,
   "colors": [
     { "name": "base", "hue": 90, "chroma": 0.006 },
     { "name": "red", "hue": 30, "chroma": 0.16 }
@@ -333,13 +349,17 @@ State shape:
 `hue` is the OKLCH hue angle in degrees, clamped server-side to the color's
 ±30° window around its ideal center; `chroma` is the target OKLCH chroma
 at peak lightness (chroma tapers toward the light/dark extremes so the
-endpoints don't look oversaturated).
+endpoints don't look oversaturated). The `tint*` fields pick the tint color
+and its mix fraction: `tintHue` in `[0,360]`, `tintL` in `[0.02,0.995]`,
+`tintChroma` in `[0,0.4]`, and `tintIntensity` in `[0,1]`, all clamped
+server-side. A state written before the tint feature (the fields absent)
+loads with intensity 0, so the palette is unchanged.
 
 `state.json` wraps this object in an envelope:
 
 ```json
 {
-  "state": { "minL": 0.17, "maxL": 0.985, "saturation": 1, "bend": 0, "pinch": 0, "pinchCenter": 0.5, "colors": [] },
+  "state": { "minL": 0.17, "maxL": 0.985, "saturation": 1, "bend": 0, "pinch": 0, "pinchCenter": 0.5, "tintHue": 30, "tintL": 0.55, "tintChroma": 0.12, "tintIntensity": 0, "colors": [] },
   "ab": { "active": "A", "slots": { "A": { "…": "the state shape above" }, "B": null } }
 }
 ```

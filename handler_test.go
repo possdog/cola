@@ -532,6 +532,50 @@ func TestPinchJSONContract(t *testing.T) {
 	}
 }
 
+func TestTintJSONContract(t *testing.T) {
+	s, _ := newTestServer(t)
+
+	// A body without tint fields (legacy clients or old state files) keeps
+	// the base's values: the built-in tint color with intensity 0 (off), so
+	// the palette is untouched.
+	resp := postPalette(t, s, `{}`)
+	if resp.State.TintIntensity != 0 || resp.State.TintHue != 30 ||
+		resp.State.TintL != 0.55 || resp.State.TintChroma != 0.12 {
+		t.Errorf("POST without tint fields = hue %v L %v C %v k %v, want the defaults",
+			resp.State.TintHue, resp.State.TintL, resp.State.TintChroma, resp.State.TintIntensity)
+	}
+
+	// The tint rides in the state like saturation: echoed after
+	// normalization and reflected in the generated palette.
+	resp = postPalette(t, s, `{"tintHue":200,"tintL":0.4,"tintChroma":0.3,"tintIntensity":0.5}`)
+	if resp.State.TintHue != 200 || resp.State.TintL != 0.4 ||
+		resp.State.TintChroma != 0.3 || resp.State.TintIntensity != 0.5 {
+		t.Errorf("posted tint echoed as hue %v L %v C %v k %v",
+			resp.State.TintHue, resp.State.TintL, resp.State.TintChroma, resp.State.TintIntensity)
+	}
+	plain := postPalette(t, s, `{"tintIntensity":0}`)
+	if got, want := resp.Palette.Colors[0].Swatches[6].Hex, plain.Palette.Colors[0].Swatches[6].Hex; got == want {
+		t.Errorf("tint intensity 0.5 left the base level-500 hex unchanged (%v)", got)
+	}
+
+	// Out-of-range values are clamped server-side, not echoed raw.
+	if got := postPalette(t, s, `{"tintIntensity":42}`).State.TintIntensity; got != 1 {
+		t.Errorf("tintIntensity 42 clamped to %v, want 1", got)
+	}
+	if got := postPalette(t, s, `{"tintIntensity":-1}`).State.TintIntensity; got != 0 {
+		t.Errorf("tintIntensity -1 clamped to %v, want 0", got)
+	}
+	if got := postPalette(t, s, `{"tintHue":420}`).State.TintHue; got != 360 {
+		t.Errorf("tintHue 420 clamped to %v, want 360", got)
+	}
+	if got := postPalette(t, s, `{"tintChroma":9}`).State.TintChroma; got != 0.4 {
+		t.Errorf("tintChroma 9 clamped to %v, want 0.4", got)
+	}
+	if got := postPalette(t, s, `{"tintL":5}`).State.TintL; got != 0.995 {
+		t.Errorf("tintL 5 clamped to %v, want 0.995", got)
+	}
+}
+
 func TestEmptyColorsFallBackToBase(t *testing.T) {
 	s, _ := newTestServer(t)
 	// A JSON empty array is a non-nil zero-length slice, so a nil check
