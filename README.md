@@ -127,9 +127,16 @@ at the top, and only one filter can apply at a time.
   wikilinks, and blue backlinks. A "Pairings" section renders one card per
   chromatic row showing its two standard pairings — level-800 ink on the
   row's level-100 ground, and its 400 step on base-950 (dark mode).
-- **Branding** — a landing page for a fictional company ("Kroma"), covering
-  the light end of the ramps: nav, hero, a strip of the live cyan ramp, and
-  feature cards.
+- **Branding** — a landing page for a fictional company ("Kroma") that walks
+  the ramps through every register a brand needs: nav, hero, a strip of the
+  live cyan ramp, and feature cards on the light end; logo marks for every
+  chromatic ramp (the 600 step solid, the 100 step tinted, ink from the
+  base ramp); primary buttons from every ramp's 600 step with 700-outline
+  secondaries, the base ramp's disabled pair, a red destructive action, and
+  status badges (100 ground, 800 ink, 500 dot); a stacked usage chart of
+  the 300/500/700 steps per ramp (a grayscale check: the three segments
+  must stay three distinct grays); pricing cards with one inverted
+  chromatic block; and a dark CTA band on base-950 covering the dark end.
 
 The previews re-render live from the palette being designed, so moving a
 slider restyles them exactly like the grid; they also honor the view filters

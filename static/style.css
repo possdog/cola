@@ -747,6 +747,121 @@ input[type="range"]::-moz-range-thumb {
 
 .brand-foot { text-align: center; font-size: 12px; margin: 26px 0 0; }
 
+.brand-sec { margin: 34px 0 14px; }
+.brand-sec h3 { margin: 0 0 4px; font-size: 15px; letter-spacing: -0.2px; }
+.brand-sec p { margin: 0; font-size: 12.5px; }
+
+.brand-marks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+.brand-markset {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid;
+  border-radius: var(--radius);
+  padding: 12px;
+}
+.brand-marktile {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 17px;
+  flex: none;
+}
+.brand-markname { font-size: 12.5px; }
+
+.brand-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+.brand-badgedot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  flex: none;
+}
+
+.brand-bars { display: grid; gap: 8px; }
+.brand-bar { display: flex; align-items: center; gap: 12px; }
+.brand-barname { width: 90px; font-size: 12.5px; text-align: right; flex: none; }
+.brand-bartrack {
+  flex: 1;
+  display: flex;
+  height: 18px;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.brand-bartrack span { display: block; height: 100%; }
+.brand-legend { display: flex; gap: 16px; margin: 12px 0 0; font-size: 12px; }
+.brand-legendchip { display: inline-flex; align-items: center; gap: 6px; }
+
+.brand-plans {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+.brand-plan {
+  border: 1px solid;
+  border-radius: var(--radius);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.brand-plan-name {
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.brand-plan-price { font-size: 26px; font-weight: 700; }
+.brand-plan-price span { font-size: 13px; font-weight: 400; }
+.brand-plan-blurb { margin: 0; font-size: 12.5px; }
+.brand-feats {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.brand-feats li { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
+.brand-featdot {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  display: inline-block;
+  flex: none;
+}
+
+.brand-dark {
+  margin-top: 34px;
+  border-radius: var(--radius);
+  padding: 30px;
+  text-align: center;
+}
+.brand-dark h3 { margin: 0 0 8px; font-size: 22px; }
+.brand-dark p { margin: 0 0 18px; font-size: 13.5px; }
+
 #toast {
   position: fixed;
   bottom: 24px;
