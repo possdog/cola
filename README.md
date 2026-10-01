@@ -117,7 +117,9 @@ record — the first toggle after a fresh start still seeds an empty slot
 with the current settings, so it changes nothing by itself.
 **Reset to defaults** restores the built-in palette (two clicks: the first
 arms the button and the second confirms); the restored defaults are
-persisted like any other change.
+persisted like any other change. It also switches the view filter to Off,
+so it doubles as an escape hatch when a filter was enabled by accident and
+every color looks wrong for no visible reason.
 
 **View filters** (radio buttons, display-only — copies and exports always use
 the real palette). The filters are alternate views of the same palette, so
@@ -317,7 +319,9 @@ grayscale chrome under grayscale, a warm interface under blue light.
   display-only `filtered` copy, plus `activeSlot` so the defaults become the
   active slot's snapshot; anything
   else in it (including a `slots` map and a malformed body) is ignored — a
-  reset must never clobber the variant being compared against.
+  reset must never clobber the variant being compared against. (The UI
+  itself sends no filters: its reset button also switches the view filter
+  to Off client-side.)
 
 **A/B record.** Every response carries `ab`: the active slot (`"A"` or
 `"B"`) and each slot's settings snapshot (`null` when never saved). The

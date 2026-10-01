@@ -74,7 +74,9 @@ relevant code; `README.md` documents the user-facing behavior in depth.
   client-side. A `POST`'s `activeSlot`/`slots` fields update the record;
   requests without them keep the stored record. `POST /api/reset` must
   never clobber the inactive slot: anything in its body besides `filters`,
-  `blueLight`, and `activeSlot` is ignored.
+  `blueLight`, and `activeSlot` is ignored. The UI's reset button also
+  switches the view filter to Off client-side (it posts an empty `filters`
+  array), so it recovers users from a filter enabled by accident.
 - Per-color hue is clamped server-side to ±30° around each chromatic
   color's ideal OKLCH center; the near-neutral base row is unconstrained.
   Keep the clamp server-side.

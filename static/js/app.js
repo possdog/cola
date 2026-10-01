@@ -47,14 +47,26 @@ async function resetPalette() {
     const data = await fetchJSON("/api/reset", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      // activeSlot rides along so the server records the defaults as the
-      // active slot's snapshot; the other slot is left untouched.
-      body: JSON.stringify({ filters: store.filter ? [store.filter] : [], blueLight: store.blueLight, activeSlot: store.abActive }),
+      // The body carries no filters: reset doubles as an escape hatch for a
+      // filter enabled by accident, so it always fetches the unfiltered
+      // view. activeSlot rides along so the server records the defaults as
+      // the active slot's snapshot; the other slot is left untouched.
+      body: JSON.stringify({ filters: [], activeSlot: store.abActive }),
     });
     if (!isLatest(seq)) return;
     store.state = data.state;
     store.palette = data.palette;
     store.view = data.filtered || data.palette;
+    // Switch the View filter to Off along with the palette: someone who
+    // enabled a filter by accident may not know to look there, and every
+    // color looking wrong is exactly when they reach for this button. The
+    // radio group and the blue-light slider follow store.filter; the
+    // intensity value itself is kept, matching the filter's own off
+    // behavior (toggling back on restores the chosen warmth).
+    store.filter = null;
+    const off = document.querySelector('input[name="view-filter"][value="off"]');
+    if (off) off.checked = true;
+    $("#bluelight-slider").hidden = true;
     // The active slot now holds the defaults, same rule as a swap.
     store.abSlots[store.abActive] = cloneState(data.state);
     // Move the already-bound global sliders to the restored values; the
