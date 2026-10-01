@@ -4,6 +4,9 @@
   --bg: #14161a;
   --bg-panel: #1c1f24;
   --bg-raised: #24282e;
+  /* Slider tracks: a thin 4px bar needs more separation from the panel
+     than the shared raised surface gives (two ramp steps brighter). */
+  --bg-track: #3a4048;
   --border: #33383f;
   --text: #e6e6e3;
   --text-dim: #9a9a94;
@@ -186,7 +189,11 @@ input[type="range"] {
   height: 4px;
   appearance: none;
   -webkit-appearance: none;
-  background: var(--bg-raised);
+  /* Not --bg-raised: at 4px tall the track needs a step more contrast
+     against the panel than the shared raised surface (buttons, tabs)
+     does to stay visible. Hue sliders override this with their inline
+     hue-window gradient. */
+  background: var(--bg-track);
   border-radius: 2px;
   outline: none;
 }

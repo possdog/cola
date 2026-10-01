@@ -17,6 +17,7 @@ func TestTheme(t *testing.T) {
 	check("Bg", theme.Bg, "base", 950)
 	check("Panel", theme.Panel, "base", 900)
 	check("Raised", theme.Raised, "base", 850)
+	check("Track", theme.Track, "base", 700)
 	check("Border", theme.Border, "base", 800)
 	check("Text", theme.Text, "base", 100)
 	check("TextDim", theme.TextDim, "base", 400)

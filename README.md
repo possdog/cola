@@ -284,7 +284,9 @@ from under you, even in panes that scroll inside nested mock regions.
 **Dogfooding**: the app's own interface is themed from the palette being
 designed. Backgrounds, borders, and text come from the base ramp (950 through
 800, 100, 400), the accent color is cyan-400, and the armed reset button uses
-red-400. The UI resolves these levels from the fetched palette itself,
+red-400. Slider tracks use base-700 rather than the shared raised level: at
+4px tall, the track needs more contrast against the panel to stay visible.
+The UI resolves these levels from the fetched palette itself,
 through the global light/dark scheme, so moving a slider restyles the very
 controls you're dragging and the Light/Dark pill flips the chrome along with
 the previews. Every API response also carries a `theme` object with the same

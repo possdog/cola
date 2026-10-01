@@ -7,6 +7,7 @@ type Theme struct {
 	Bg      string `json:"bg"`
 	Panel   string `json:"panel"`
 	Raised  string `json:"raised"`
+	Track   string `json:"track"`
 	Border  string `json:"border"`
 	Text    string `json:"text"`
 	TextDim string `json:"textDim"`
@@ -60,6 +61,11 @@ func (p Palette) Theme() *Theme {
 	}
 	panel, _ := p.swatchHex("base", 900)
 	raised, _ := p.swatchHex("base", 850)
+	// Slider tracks are thin 4px bars, too small for the one-level step
+	// between panel and raised to read; two levels above raised keeps them
+	// visible against the panel (the ramp has no 750, and one level would
+	// land exactly on the border color).
+	track, _ := p.swatchHex("base", 700)
 	border, _ := p.swatchHex("base", 800)
 	text, _ := p.swatchHex("base", 100)
 	dim, _ := p.swatchHex("base", 400)
@@ -77,6 +83,7 @@ func (p Palette) Theme() *Theme {
 		Bg:      bg,
 		Panel:   panel,
 		Raised:  raised,
+		Track:   track,
 		Border:  border,
 		Text:    text,
 		TextDim: dim,
