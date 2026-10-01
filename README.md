@@ -195,7 +195,10 @@ at the top, and only one filter can apply at a time.
   row's level-100 ground, and its 400 step on base-950 (dark mode).
 - **Landing** — a landing page for a fictional company ("Kroma") that walks
   the ramps through every register a brand needs: nav, hero, a strip of the
-  live cyan ramp, and feature cards on the light end; logo marks for every
+  live cyan ramp, and feature cards on the light end; an announcement ribbon
+  graded across every chromatic ramp's 600 step (a cross-hue gradient, where
+  equal lightness keeps the band an even wash and the level-50 ink at one
+  contrast); logo marks for every
   chromatic ramp (the 600 step solid, the 100 step tinted, ink from the
   base ramp); primary buttons from every ramp's 600 step with 700-outline
   secondaries, the base ramp's disabled pair, a red destructive action, and
@@ -212,7 +215,11 @@ at the top, and only one filter can apply at a time.
   drop cap and pull quote, body copy drawn as tinted bars, and an abstract
   full-bleed "photo" plate on the facing page); gradient album art per
   ramp (the 400-to-800 span blended by CSS, so the preview shows the
-  sRGB interpolation a designer would actually ship); geometric pattern
+  sRGB interpolation a designer would actually ship); duotones — each
+  ramp blended into its wheel neighbor at the shared 500 step, a
+  cross-hue gradient that crosses hue but not lightness (under the
+  grayscale filter each tile should flatten to one gray, the
+  equal-lightness check in reverse); geometric pattern
   tiles (disc, half disc, quarter, and bars from the 300/600/800 trio on
   a 100 ground); and a type specimen where each ramp's 300/600/900 steps
   play display-type weight classes on the lightest ground.

@@ -80,6 +80,22 @@ export function renderDesign() {
       <figcaption class="design-cover-artist" style="color:${hexOf(c.name, 100)}">${esc(c.name)} era</figcaption>
     </figure>`).join("");
 
+  // Duotones: cross-hue gradients — each chromatic ramp blended into its
+  // wheel neighbor at the shared 500 step. Because both stops sit at one
+  // Oklab L, the blend crosses hue without crossing lightness, so under the
+  // grayscale filter each tile should collapse toward a single flat gray —
+  // the equal-lightness property in one glance, the inverse of the posters'
+  // and usage bars' distinct-gray checks. The pair wraps cyclically so the
+  // last ramp blends back into the first.
+  const duos = chrom.map((c, i) => {
+    const next = chrom[(i + 1) % chrom.length].name;
+    return `
+    <figure class="design-cover" style="background:linear-gradient(135deg, ${hexOf(c.name, 500)} 0%, ${hexOf(next, 500)} 100%)">
+      <figcaption class="design-cover-title" style="color:${hexOf("base", 50)}">${esc(c.name)} × ${esc(next)}</figcaption>
+      <figcaption class="design-cover-artist" style="color:${hexOf("base", 100)}">level 500 · cross-hue</figcaption>
+    </figure>`;
+  }).join("");
+
   // Pattern tiles: flat geometric shapes (disc, half disc, quarter, bars)
   // in the 300/600 pair on a 100 ground — the Bauhaus-derived vocabulary
   // behind a lot of current packaging and web illustration.
@@ -118,6 +134,8 @@ export function renderDesign() {
       ${spread}
       ${sec("Album art", "Two-step gradients (400 to 800) — the expressive middle of every ramp, blended the way CSS actually ships them.")}
       <div class="design-covers">${covers}</div>
+      ${sec("Duotones", "Adjacent hues blended at the shared 500 step — a gradient that crosses hue but not lightness. Under the grayscale filter each tile should flatten to a single gray: the equal-lightness check in reverse.")}
+      <div class="design-covers">${duos}</div>
       ${sec("Patterns", "Flat geometric shapes per ramp: the 300/600/800 trio on a 100 ground — the vocabulary behind current packaging and illustration.")}
       <div class="design-tiles">${tiles}</div>
       ${sec("Type specimen", "Display type per ramp on the lightest ground: the 300/600/900 trio as weight classes that must hold without re-tuning.")}

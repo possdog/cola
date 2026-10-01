@@ -71,6 +71,19 @@ export function renderLanding() {
     <span class="brand-btn-primary" style="background:${hexOf("base", 200)};color:${hexOf("base", 500)}">Disabled</span>
     <span class="brand-btn-primary" style="background:${hexOf("red", 600)};color:${hexOf("base", 50)}">Delete project</span>`;
 
+  // Announcement ribbon: a cross-hue gradient through every chromatic ramp's
+  // 600 step. Equal lightness is what makes a multi-hue gradient wearable —
+  // every stop shares one Oklab L, so the band reads as an even wash and the
+  // level-50 ink holds one contrast across its whole run. Built from the
+  // live chromatic rows so renames carry through. Skipped when there are no
+  // chromatic rows: with no stops the gradient is invalid CSS, and the
+  // base-50 ink would vanish on the base-50 page.
+  const banner = chrom.length ? `
+    <div class="brand-banner" style="background:linear-gradient(90deg, ${chrom.map((c) => hexOf(c.name, 600)).join(", ")})">
+      <span class="brand-banner-tag" style="background:${hexOf("base", 50)};color:${hexOf("base", 800)}">New</span>
+      <span style="color:${hexOf("base", 50)}">Token exports now map levels straight to platform variables.</span>
+    </div>` : "";
+
   // Status badges: the 100-ground/800-ink pairing from the Notes tab, with a
   // 500 dot — the three steps a status pill leans on, in one glance.
   const badges = chrom.map((c) => `
@@ -153,6 +166,7 @@ export function renderLanding() {
           <span class="brand-btn-ghost" style="border-color:${hexOf("base", 300)};color:${hexOf("base", 800)}">Read the docs</span>
         </div>
       </div>
+      ${banner}
       <div class="brand-strip">${strip}</div>
       <div class="brand-cards">${cards}</div>
       ${sec("Marks", "Every ramp as a logo: the 600 step solid, the 100 step tinted, each with ink from the base ramp.")}
