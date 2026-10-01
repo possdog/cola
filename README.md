@@ -142,10 +142,30 @@ at the top, and only one filter can apply at a time.
   In both layouts the near-neutral base row — whose hue is unconstrained —
   appears as a legend ramp under the wheel instead of a wheel position.
   Click any swatch to copy its hex.
-- **Code** — a syntax-highlighted TypeScript sample in a mock editor. Token
-  classes map to palette rows (keywords red-400, types cyan-400, functions
-  blue-400, strings green-400, numbers orange-400, properties yellow-300,
-  comments base-500) on a base-950 editor background.
+- **Code** — a syntax-highlighted TypeScript sample shown in three programming
+  environments, toggled at the top of the pane (a display-only preference,
+  never persisted):
+  - *Graphical* — a modern editor in the VS Code / Sublime mold: activity
+    rail (one SVG icon per chromatic row at its 400 step), file sidebar with
+    per-type dots, a yellow git-modified marker, tab strip with per-file
+    accent underlines, breadcrumbs, a minimap strip (one bar per token in
+    the token's own color), and a blue-600 status bar carrying level-50 ink.
+    Token classes map one row each (keywords red-400, types cyan-400,
+    functions blue-400, strings green-400, numbers orange-400, properties
+    yellow-300, constants purple-300, template interpolations magenta-400,
+    comments base-500) on a base-950 editor background.
+  - *Terminal* — a Neovim-style TUI over the same tokenized sample: a
+    cursorline with cyan-400 line number, a search match inverted onto its
+    yellow-300 ground with base-950 ink, a `:Colorscheme` completion popup
+    whose selected row is cyan-600 on level-50 ink, and a lualine-style
+    statusline (blue-600 NORMAL block, green branch, red/yellow diagnostics).
+  - *Agent* — a coding-agent chat TUI: a cyan-branded banner, Read/Plan/Edit
+    tool boxes (the Read box shows a slice of the same sample), a diff whose
+    deletions are red-400 on red-950 against green-400 on green-950
+    additions, a green/yellow/base todo list, a yellow-bordered permission
+    prompt with the green-allow / red-deny / cyan-always options, a token
+    meter, and an input line — the semantic pairs (add vs delete, allow vs
+    deny) an agent UI must never let blur together.
 - **Notes** — an Obsidian-style note app: dark file sidebar with a search
   field and a cyan "New note" button, light editor, tag pills in several
   hues, inline code and highlight spans, a checklist, an orange callout,
