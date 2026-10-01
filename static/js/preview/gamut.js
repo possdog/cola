@@ -24,13 +24,15 @@ let drawQueued = false;
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
-// Chroma is drawn ~2.2x its raw OKLCH scale relative to lightness. Honest
-// units make the palette a tall, thin spindle (chroma tops out near 0.4
-// while lightness spans almost 1.0); exaggerating the horizontal axes
-// widens the scene around the center so the default palette's silhouette
-// reads closer to a sphere. Display-only geometry, like the wheel's fixed
-// layout: it rescales positions, never the plotted values themselves.
-const CHROMA_SCALE = 2.2;
+// Chroma is drawn exaggerated relative to lightness. Honest units make the
+// palette a tall, thin spindle (chroma tops out near 0.4 while lightness
+// spans almost 1.0); exaggerating the horizontal axes widens the scene
+// around the center so the default palette's silhouette reads closer to a
+// sphere. The factor is a display-only preference like the camera: adjusted
+// by the pane's slider, never persisted, never part of the exported state.
+// It rescales positions, never the plotted values themselves.
+const CHROMA_SCALE_DEFAULT = 2.2;
+let chromaScale = CHROMA_SCALE_DEFAULT;
 
 // One dot per swatch, one path per chromatic row, plus the per-level chroma
 // envelope rings and the lightness axis. The base row is included: its chroma
@@ -47,7 +49,7 @@ function sceneData() {
       // same convention as the wheel. Height is Oklab L centered at 0.5 so
       // the scene's origin is its own midpoint.
       const a = (s.h * Math.PI) / 180;
-      const r = s.c * CHROMA_SCALE;
+      const r = s.c * chromaScale;
       const dot = {
         x: r * Math.sin(a),
         y: r * Math.cos(a),
@@ -75,7 +77,7 @@ function sceneData() {
     let z = 0;
     for (const { vcol } of chrom) {
       const s = vcol.swatches[j];
-      r = Math.max(r, s.c * CHROMA_SCALE);
+      r = Math.max(r, s.c * chromaScale);
       z = s.l - 0.5;
     }
     return { r, z };
@@ -363,17 +365,32 @@ function attachGamutControls(canvas) {
 export function renderGamut() {
   const pane = $("#gamut-preview");
   let canvas = pane.querySelector("canvas");
-  // The pane skeleton (canvas + hint) is built once and kept across updates,
-  // like the grid's in-place patching: a camera drag must survive the slider
-  // responses that re-render the pane, and rebuilding the canvas would drop
-  // pointer capture mid-gesture.
+  // The pane skeleton (scale bar + canvas + hint) is built once and kept
+  // across updates, like the grid's in-place patching: a camera drag must
+  // survive the slider responses that re-render the pane, and rebuilding the
+  // canvas would drop pointer capture mid-gesture.
   if (!canvas) {
     pane.innerHTML = `
+      <div class="gamut-bar">
+        <label for="gamut-chroma">Chroma scale</label>
+        <input type="range" id="gamut-chroma" min="1" max="4" step="0.1" value="${chromaScale}">
+        <span class="val" id="gamut-chroma-val">${chromaScale.toFixed(1)}x</span>
+      </div>
       <canvas id="gamut-canvas" role="img" aria-label="Palette gamut in OKLCH space"></canvas>
-      <p class="gamut-hint">OKLCH space: angle is hue, radius is chroma (exaggerated 2.2x for legibility), height is lightness (level ${store.palette.levels[0]} at the top). Drag to rotate, scroll to zoom, click a swatch to copy its hex, double-click empty space to reset the view.</p>`;
+      <p class="gamut-hint">OKLCH space: angle is hue, radius is chroma (exaggerated by the Chroma scale slider for legibility), height is lightness (level ${store.palette.levels[0]} at the top). Drag to rotate, scroll to zoom, click a swatch to copy its hex, double-click empty space to reset the view.</p>`;
     canvas = pane.querySelector("canvas");
     canvasEl = canvas;
     attachGamutControls(canvas);
+    // Chroma scale slider: pure display geometry, so it redraws the scene
+    // locally — no request, nothing persisted. 1x is honest OKLCH
+    // proportions; higher values widen the scene toward a sphere.
+    const scaleSlider = pane.querySelector("#gamut-chroma");
+    const scaleVal = pane.querySelector("#gamut-chroma-val");
+    scaleSlider.addEventListener("input", () => {
+      chromaScale = Number(scaleSlider.value);
+      scaleVal.textContent = `${chromaScale.toFixed(1)}x`;
+      requestDraw();
+    });
     // A window resize reflows the pane after the last draw; redraw so the
     // backing store tracks the new canvas box, but only while visible.
     window.addEventListener("resize", () => {

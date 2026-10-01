@@ -455,6 +455,21 @@ input[type="range"]::-moz-range-thumb {
   touch-action: none;
 }
 #gamut-canvas.dragging { cursor: grabbing; }
+/* Chroma scale slider, centered above the canvas. The range input's global
+   rule is width: 100%, so it is re-narrowed to a fixed bar width here. */
+.gamut-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.gamut-bar input[type="range"] { width: 160px; }
+.gamut-bar .val {
+  font-variant-numeric: tabular-nums;
+  min-width: 36px;
+}
 .gamut-hint { color: var(--text-dim); font-size: 12px; margin: 0; }
 
 
