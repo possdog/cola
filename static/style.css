@@ -1,0 +1,611 @@
+:root {
+  /* Fallback UI colors; app.js overrides all of these live with swatches
+     from the palette being designed (see applyTheme). */
+  --bg: #14161a;
+  --bg-panel: #1c1f24;
+  --bg-raised: #24282e;
+  --border: #33383f;
+  --text: #e6e6e3;
+  --text-dim: #9a9a94;
+  --accent: #7ab8d4;
+  /* --danger gets overridden live by the palette-derived theme (red-400);
+     this is only the pre-load fallback. */
+  --danger: #e06c60;
+  --radius: 8px;
+  /* Layout constants for the viewport-height grid: header block, main's
+     bottom padding, and a little slack. */
+  --header-h: 88px;
+  --main-pad-b: 32px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 20px 24px 12px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 24px;
+  letter-spacing: 0.5px;
+}
+
+.brand p {
+  margin: 2px 0 0;
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+.actions { display: flex; gap: 8px; }
+
+button {
+  background: var(--bg-raised);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 7px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+button:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Armed reset: danger-colored until the confirming click (or the auto-revert
+   timeout) so it reads as a warning, hover included. */
+button.armed,
+button.armed:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+main {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 0 24px 32px;
+}
+
+#controls {
+  width: 300px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+
+.panel h2 {
+  margin: 0 0 10px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+}
+
+.slider-group {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  row-gap: 4px;
+  margin-bottom: 12px;
+}
+.slider-group:last-child { margin-bottom: 2px; }
+
+.slider-group .label { font-size: 13px; }
+.slider-group .hint { font-style: normal; color: var(--text-dim); font-size: 12px; }
+.slider-group .val {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-dim);
+  font-size: 12px;
+  min-width: 52px;
+  text-align: right;
+}
+.slider-group input { grid-column: 1 / -1; }
+
+input[type="range"] {
+  width: 100%;
+  height: 4px;
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--bg-raised);
+  border-radius: 2px;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: none;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+}
+
+/* Hue slider tracks get an inline gradient from app.js showing the exact
+   hue window each color is allowed to span. */
+
+.hint-block {
+  margin: 0 0 10px;
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+.checkbox {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  font-size: 13px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.checkbox:last-child { margin-bottom: 0; }
+.checkbox input { flex-shrink: 0; }
+.checkbox em { color: var(--text-dim); font-style: normal; font-size: 12px; }
+
+/* Radio options in the sidebar View panel (mutually-exclusive filters).
+   Mirrors the .checkbox rules above, which the notes preview's checklist
+   boxes also rely on. */
+.radio {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  font-size: 13px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.radio:last-child { margin-bottom: 0; }
+.radio input { flex-shrink: 0; }
+.radio em { color: var(--text-dim); font-style: normal; font-size: 12px; }
+
+/* Intensity slider for filters that take one (currently blue light): sits
+   indented under its radio option, aligned with the label text. */
+.filter-slider { margin: 0 0 10px 22px; }
+.filter-slider .slider-group { margin-bottom: 0; }
+
+.color-row {
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+}
+.color-row:first-child { border-top: none; padding-top: 0; }
+.color-row .color-name {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.color-row .color-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  display: inline-block;
+}
+
+/* The right-hand stage holds the tab bar plus whichever preview pane is
+   active. It (not the grid alone) is what stays pinned to the viewport while
+   the controls column scrolls past. */
+#stage {
+  flex: 1;
+  min-width: 0;
+  position: sticky;
+  top: 12px;
+  height: calc(100vh - var(--header-h) - var(--main-pad-b) - 4px);
+  height: calc(100dvh - var(--header-h) - var(--main-pad-b) - 4px);
+  display: flex;
+  flex-direction: column;
+}
+
+/* The panes all carry display rules, which would beat the hidden attribute's
+   UA display:none — so hidden gets its own win here. */
+#stage > [hidden] { display: none; }
+
+#tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.tab {
+  background: var(--bg-panel);
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 5px 14px;
+  font-size: 13px;
+}
+.tab:hover { border-color: var(--accent); color: var(--text); }
+.tab.active {
+  background: var(--bg-raised);
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.preview-pane {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  border-radius: var(--radius);
+}
+
+#grid-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  /* The footnote sits inside this box; the grid flexes to fill what's left. */
+  display: flex;
+  flex-direction: column;
+}
+
+#grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  gap: 3px;
+  min-width: 1080px;
+}
+
+.cell { border-radius: 5px; }
+
+.cell.head {
+  color: var(--text-dim);
+  font-size: 12px;
+  text-align: center;
+  padding: 4px 0;
+}
+
+.cell.rowhead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0 10px 0 4px;
+}
+.cell.rowhead .color-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+.cell.swatch {
+  /* Cells stretch with their grid row (1fr); the min-height keeps short
+     viewports usable instead of crushing the cells. */
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.08s ease;
+}
+.cell.swatch:hover { transform: scale(1.06); z-index: 1; }
+.cell.swatch span {
+  opacity: 0;
+  transition: opacity 0.08s ease;
+}
+.cell.swatch:hover span { opacity: 1; }
+
+.grid-footnote {
+  color: var(--text-dim);
+  font-size: 12px;
+  margin: 10px 2px 0;
+}
+
+/* ---- preview panes (Code / Notes / Branding) ---------------------------- */
+/* These mock app UIs are pure demo surfaces: app.js rebuilds their innerHTML
+   with inline palette colors on every update, so structure lives in JS and
+   only layout/typography lives here. */
+
+/* Editor window (Code tab) */
+#code-preview { display: flex; flex-direction: column; }
+
+.window {
+  display: flex;
+  flex-direction: column;
+  max-width: 760px;
+  margin: 0 auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.window-bar {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+}
+.window-bar .light {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.window-title {
+  margin-left: 8px;
+  font-size: 12.5px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.window-body {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+}
+
+.code-gutter {
+  display: flex;
+  flex-direction: column;
+  padding: 14px 10px 14px 14px;
+  text-align: right;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12.5px;
+  line-height: 1.7;
+  user-select: none;
+}
+
+.code {
+  margin: 0;
+  padding: 14px 16px;
+  overflow: auto;
+  flex: 1;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+
+.window-status {
+  display: flex;
+  gap: 18px;
+  padding: 6px 12px;
+  font-size: 11.5px;
+}
+.window-status .grow { flex: 1; }
+
+/* Notes app (Notes tab) */
+#notes-preview { display: flex; flex-direction: column; }
+
+.notes-app {
+  flex: 1;
+  min-height: 420px;
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.notes-side {
+  width: 190px;
+  flex-shrink: 0;
+  padding: 14px 10px;
+  overflow: auto;
+}
+.notes-side-head { font-weight: 600; font-size: 13px; margin-bottom: 10px; }
+.notes-group {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 14px 6px 4px;
+}
+.notes-item {
+  font-size: 13px;
+  padding: 5px 8px;
+  border-radius: 5px;
+  border-left: 3px solid transparent;
+  cursor: default;
+}
+
+.notes-editor {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+  padding: 28px 32px;
+}
+.notes-title { font-size: 22px; font-weight: 700; }
+.notes-meta { display: flex; align-items: center; gap: 6px; margin: 8px 0 16px; }
+.tag {
+  font-size: 11.5px;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.notes-date { font-size: 11.5px; margin-left: auto; }
+.notes-editor p { font-size: 13.5px; margin: 10px 0; }
+.notes-editor h3 { font-size: 14px; margin: 18px 0 6px; }
+.notes-link { text-decoration: underline; cursor: pointer; }
+.notes-checks { list-style: none; margin: 6px 0; padding: 0; }
+.notes-checks li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  padding: 3px 0;
+}
+.notes-checks li.done { text-decoration: line-through; }
+/* Scoped to the checklist: keeps the 14px sizing off any future .checkbox
+   use outside the notes preview (the sidebar View panel uses .radio). */
+.notes-checks .checkbox {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1.5px solid;
+  flex-shrink: 0;
+  position: relative;
+}
+/* Drawn check mark with borders instead of a glyph so it inherits the box's
+   white-on-green look without shipping a character. */
+.notes-checks .checkbox.on { border-color: transparent; }
+.notes-checks .checkbox.on::after {
+  content: "";
+  position: absolute;
+  left: 3.5px;
+  top: 1px;
+  width: 4px;
+  height: 8px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.notes-editor blockquote {
+  margin: 14px 0 0;
+  padding: 8px 14px;
+  border-left: 3px solid;
+  border-radius: 0 6px 6px 0;
+  font-size: 13.5px;
+}
+
+/* Landing page (Branding tab) */
+#branding-preview { display: flex; flex-direction: column; }
+
+.brand-page {
+  flex: 1;
+  border-radius: var(--radius);
+  overflow: auto;
+  padding: 0 36px 28px;
+}
+
+.brand-nav {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 0;
+  font-size: 13px;
+}
+.brand-mark {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+.brand-word { font-weight: 700; font-size: 16px; letter-spacing: 0.3px; }
+.brand-links { cursor: pointer; }
+.brand-cta {
+  margin-left: 4px;
+  border: 1px solid;
+  border-radius: 999px;
+  padding: 5px 14px;
+  cursor: pointer;
+}
+.brand-nav .grow { flex: 1; }
+
+.brand-hero { text-align: center; padding: 36px 0 30px; }
+.brand-eyebrow {
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin: 0 0 12px;
+}
+.brand-hero h2 {
+  margin: 0;
+  font-size: 38px;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+}
+.brand-sub {
+  max-width: 520px;
+  margin: 14px auto 0;
+  font-size: 15px;
+  line-height: 1.55;
+}
+.brand-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+.brand-btn-primary,
+.brand-btn-ghost {
+  border-radius: 999px;
+  padding: 9px 22px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.brand-btn-ghost { border: 1px solid; }
+
+.brand-strip {
+  display: flex;
+  height: 34px;
+  margin: 8px 0 28px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.brand-strip span { flex: 1; }
+
+.brand-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+.brand-card {
+  border: 1px solid;
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.brand-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  display: inline-block;
+  margin-bottom: 10px;
+}
+.brand-card h4 { margin: 0 0 6px; font-size: 14px; }
+.brand-card p { margin: 0; font-size: 12.5px; line-height: 1.5; }
+
+.brand-foot { text-align: center; font-size: 12px; margin: 26px 0 0; }
+
+#toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-raised);
+  border: 1px solid var(--accent);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 8px 16px;
+  font-size: 13px;
+  z-index: 10;
+}
+
+@media (max-width: 900px) {
+  main { flex-direction: column; }
+  #controls { width: 100%; }
+  /* Stacked layout: everything scrolls in document order, nothing pinned,
+     and each pane takes its natural height instead of the viewport's. */
+  #stage { position: static; height: auto; }
+  #grid-wrap, .preview-pane { flex: none; max-height: 70vh; }
+}

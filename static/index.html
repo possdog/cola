@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cola — Palette Designer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <h1>Cola</h1>
+      <p>Oklab palette designer — equal levels share perceived lightness across every hue.</p>
+    </div>
+    <div class="actions">
+      <button id="copy-css" type="button">Copy CSS variables</button>
+      <button id="copy-json" type="button">Copy JSON</button>
+      <button id="reset" type="button">Reset to defaults</button>
+    </div>
+  </header>
+
+  <main>
+    <aside id="controls">
+      <section class="panel">
+        <h2>Global</h2>
+        <label class="slider-group">
+          <span class="label">Lightest L <em class="hint">(level 50)</em></span>
+          <input type="range" id="maxL" min="0.85" max="0.995" step="0.005">
+          <span class="val" id="maxL-val"></span>
+        </label>
+        <label class="slider-group">
+          <span class="label">Darkest L <em class="hint">(level 950)</em></span>
+          <input type="range" id="minL" min="0.05" max="0.4" step="0.005">
+          <span class="val" id="minL-val"></span>
+        </label>
+        <label class="slider-group">
+          <span class="label">Saturation</span>
+          <input type="range" id="saturation" min="0" max="2" step="0.05">
+          <span class="val" id="saturation-val"></span>
+        </label>
+      </section>
+
+      <section class="panel">
+        <h2>View</h2>
+        <p class="hint-block">Display-only filters; copies and exports always use the real palette.</p>
+        <!-- Radio group, not checkboxes: the filters are alternate views of
+             the same palette (e.g. protanopia AND deuteranopia is
+             meaningless), so at most one can be active. "Off" shows the real
+             palette. -->
+        <label class="radio">
+          <input type="radio" name="view-filter" value="off" checked>
+          <span>Off <em>— show the real palette</em></span>
+        </label>
+        <label class="radio">
+          <input type="radio" name="view-filter" value="grayscale">
+          <span>Grayscale <em>— drops chroma at constant Oklab L; each column should become one uniform gray</em></span>
+        </label>
+        <label class="radio">
+          <input type="radio" name="view-filter" value="protanopia">
+          <span>Protanopia <em>— no red perception</em></span>
+        </label>
+        <label class="radio">
+          <input type="radio" name="view-filter" value="deuteranopia">
+          <span>Deuteranopia <em>— no green perception</em></span>
+        </label>
+        <label class="radio">
+          <input type="radio" name="view-filter" value="tritanopia">
+          <span>Tritanopia <em>— no blue perception</em></span>
+        </label>
+        <label class="radio">
+          <input type="radio" name="view-filter" value="bluelight">
+          <span>Blue light <em>— warm dimming like f.lux or Night Shift</em></span>
+        </label>
+        <div class="filter-slider" id="bluelight-slider" hidden>
+          <label class="slider-group">
+            <span class="label">Intensity</span>
+            <input type="range" id="blueLight" min="0" max="1" step="0.05" value="0.5">
+            <span class="val" id="blueLight-val"></span>
+          </label>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Colors</h2>
+        <div id="color-controls"></div>
+      </section>
+    </aside>
+
+    <section id="stage">
+      <div id="tabs" role="tablist" aria-label="Palette preview">
+        <button class="tab active" type="button" role="tab" aria-selected="true" aria-controls="grid-wrap" data-tab="grid">Grid</button>
+        <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="code-preview" data-tab="code">Code</button>
+        <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="notes-preview" data-tab="notes">Notes</button>
+        <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="branding-preview" data-tab="branding">Branding</button>
+      </div>
+
+      <section id="grid-wrap" role="tabpanel">
+        <div id="grid" aria-label="Palette grid"></div>
+        <p class="grid-footnote">Click any swatch to copy its hex value.</p>
+      </section>
+      <section id="code-preview" class="preview-pane" role="tabpanel" hidden></section>
+      <section id="notes-preview" class="preview-pane" role="tabpanel" hidden></section>
+      <section id="branding-preview" class="preview-pane" role="tabpanel" hidden></section>
+    </section>
+  </main>
+
+  <!-- role/aria-live so copy and reset feedback is announced by screen
+       readers, not just flashed visually. -->
+  <div id="toast" role="status" aria-live="polite" hidden></div>
+  <script src="app.js"></script>
+</body>
+</html>

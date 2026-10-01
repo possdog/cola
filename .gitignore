@@ -1,0 +1,5 @@
+# Generated localhost TLS pair (contains a private key).
+certs/
+
+# Persisted palette settings.
+state.json
