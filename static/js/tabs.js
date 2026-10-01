@@ -13,7 +13,7 @@ import { renderBranding } from "./preview/branding.js";
 const TAB_PANES = {
   grid: "#grid-wrap",
   wheel: "#wheel-preview",
-  "3d": "#gamut-preview",
+  gamut: "#gamut-preview",
   code: "#code-preview",
   notes: "#notes-preview",
   branding: "#branding-preview",
@@ -25,7 +25,7 @@ function renderActive() {
   renderGrid();
   const { activeTab } = store;
   if (activeTab === "wheel") renderWheel();
-  else if (activeTab === "3d") renderGamut();
+  else if (activeTab === "gamut") renderGamut();
   else if (activeTab === "code") renderCode();
   else if (activeTab === "notes") renderNotes();
   else if (activeTab === "branding") renderBranding();

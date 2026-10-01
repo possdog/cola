@@ -142,7 +142,7 @@ at the top, and only one filter can apply at a time.
   In both layouts the near-neutral base row — whose hue is unconstrained —
   appears as a legend ramp under the wheel instead of a wheel position.
   Click any swatch to copy its hex.
-- **3D** — an interactive plot of the palette in OKLCH space on a canvas
+- **Gamut** — an interactive plot of the palette in OKLCH space on a canvas
   renderer (no libraries, no build step): angle is hue, radius is chroma,
   and height is Oklab lightness, with level 50 at the top of the axis.
   Every swatch is a dot, each chromatic row is traced by a path (the ramp's

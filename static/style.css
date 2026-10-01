@@ -434,10 +434,10 @@ input[type="range"]::-moz-range-thumb {
 .legend-swatch:hover { outline: 2px solid var(--text); outline-offset: 1px; }
 .wheel-hint { color: var(--text-dim); font-size: 12px; margin: 0; }
 
-/* 3D gamut (3D tab). Unlike the mock panes, the canvas is created once and
-   kept across updates (gamut.js redraws it in place so a camera drag
-   survives slider responses); only layout lives here — every stroke and
-   fill is painted by gamut.js from the API response. */
+/* Gamut preview (Gamut tab). Unlike the mock panes, the canvas is created
+   once and kept across updates (gamut.js redraws it in place so a camera
+   drag survives slider responses); only layout lives here — every stroke
+   and fill is painted by gamut.js from the API response. */
 #gamut-preview {
   display: flex;
   flex-direction: column;

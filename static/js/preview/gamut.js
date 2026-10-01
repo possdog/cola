@@ -1,4 +1,4 @@
-// 3D preview tab: the palette plotted in OKLCH space — angle is hue, radius
+// Gamut preview tab: the palette plotted in OKLCH space — angle is hue, radius
 // is chroma, height is lightness — on a hand-rolled canvas renderer. Like the
 // wheel this is geometry only: the frontend computes no colors, it positions
 // dots from the l/c/h values the API already returns and paints them with the
@@ -58,7 +58,8 @@ function sceneData() {
   // across the chromatic rows — the palette's gamut outline, level by level.
   // It passes through the outermost dots, so the ring set traces how far the
   // palette actually reaches into OKLCH space (and collapses to a thin pole
-  // under the grayscale filter, the 3D analogue of the grid's gray columns).
+  // under the grayscale filter, the Gamut tab's analogue of the grid's gray
+  // columns).
   const chrom = pairs.filter((p) => p.vcol.name !== "base");
   const rings = store.palette.levels.map((_, j) => {
     let r = 0;
@@ -231,8 +232,8 @@ function drawGamut() {
   ctx.fillText(`L ${scene.axis.bot.label}`, clamp(bot.px, 24, w - 24), clamp(bot.py + 4, 0, h - 14));
 
   // Hover tooltip: name-level and hex for the hovered dot, clamped inside the
-  // canvas. Canvas has no per-element titles, so this is the 3D analogue of
-  // the SVG swatches' <title>.
+  // canvas. Canvas has no per-element titles, so this is the Gamut tab's
+  // analogue of the SVG swatches' <title>.
   if (hoveredDot) {
     const hit = projDots.find((q) => q.dot === hoveredDot);
     if (hit) {
@@ -367,7 +368,7 @@ export function renderGamut() {
     // A window resize reflows the pane after the last draw; redraw so the
     // backing store tracks the new canvas box, but only while visible.
     window.addEventListener("resize", () => {
-      if (store.activeTab === "3d" && !pane.hidden) requestDraw();
+      if (store.activeTab === "gamut" && !pane.hidden) requestDraw();
     });
   }
   drawGamut();
