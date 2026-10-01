@@ -473,20 +473,20 @@ func TestPinchJSONContract(t *testing.T) {
 	s, _ := newTestServer(t)
 
 	// Bodies without the new fields (legacy clients or old state files)
-	// keep the base's defaults: pinch 0 (identity) and a mid pitch center.
-	if got := postPalette(t, s, `{}`); got.State.Pinch != 0 || got.State.PitchCenter != 0.5 {
-		t.Errorf("POST without pinch/pitchCenter = %v/%v, want 0/0.5",
-			got.State.Pinch, got.State.PitchCenter)
+	// keep the base's defaults: pinch 0 (identity) and a mid pinch center.
+	if got := postPalette(t, s, `{}`); got.State.Pinch != 0 || got.State.PinchCenter != 0.5 {
+		t.Errorf("POST without pinch/pinchCenter = %v/%v, want 0/0.5",
+			got.State.Pinch, got.State.PinchCenter)
 	}
 
 	// Both ride in the state like saturation: echoed after normalization
 	// and reflected in the generated palette.
-	resp := postPalette(t, s, `{"pinch":0.5,"pitchCenter":0.8}`)
-	if resp.State.Pinch != 0.5 || resp.State.PitchCenter != 0.8 {
-		t.Errorf("posted pinch/pitchCenter echoed as %v/%v",
-			resp.State.Pinch, resp.State.PitchCenter)
+	resp := postPalette(t, s, `{"pinch":0.5,"pinchCenter":0.8}`)
+	if resp.State.Pinch != 0.5 || resp.State.PinchCenter != 0.8 {
+		t.Errorf("posted pinch/pinchCenter echoed as %v/%v",
+			resp.State.Pinch, resp.State.PinchCenter)
 	}
-	plain := postPalette(t, s, `{"pinch":0,"pitchCenter":0.5}`)
+	plain := postPalette(t, s, `{"pinch":0,"pinchCenter":0.5}`)
 	if got, want := resp.Palette.Colors[0].Swatches[6].L, plain.Palette.Colors[0].Swatches[6].L; got == want {
 		t.Errorf("pinch 0.5 left level-500 lightness unchanged (%v)", got)
 	}
@@ -498,11 +498,11 @@ func TestPinchJSONContract(t *testing.T) {
 	if got := postPalette(t, s, `{"pinch":-42}`); got.State.Pinch != -1 {
 		t.Errorf("pinch -42 clamped to %v, want -1", got.State.Pinch)
 	}
-	if got := postPalette(t, s, `{"pitchCenter":2}`); got.State.PitchCenter != 1 {
-		t.Errorf("pitchCenter 2 clamped to %v, want 1", got.State.PitchCenter)
+	if got := postPalette(t, s, `{"pinchCenter":2}`); got.State.PinchCenter != 1 {
+		t.Errorf("pinchCenter 2 clamped to %v, want 1", got.State.PinchCenter)
 	}
-	if got := postPalette(t, s, `{"pitchCenter":-1}`); got.State.PitchCenter != 0 {
-		t.Errorf("pitchCenter -1 clamped to %v, want 0", got.State.PitchCenter)
+	if got := postPalette(t, s, `{"pinchCenter":-1}`); got.State.PinchCenter != 0 {
+		t.Errorf("pinchCenter -1 clamped to %v, want 0", got.State.PinchCenter)
 	}
 }
 

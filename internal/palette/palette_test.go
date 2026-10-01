@@ -116,22 +116,22 @@ func TestNormalizedClamps(t *testing.T) {
 		t.Errorf("negative bend not clamped: %v", n2.Bend)
 	}
 	s.Pinch = 9
-	s.PitchCenter = -3
+	s.PinchCenter = -3
 	n3 := s.Normalized()
 	if n3.Pinch != 1 {
 		t.Errorf("pinch not clamped: %v", n3.Pinch)
 	}
-	if n3.PitchCenter != 0 {
-		t.Errorf("pitch center not clamped: %v", n3.PitchCenter)
+	if n3.PinchCenter != 0 {
+		t.Errorf("pinch center not clamped: %v", n3.PinchCenter)
 	}
 	s.Pinch = -9
-	s.PitchCenter = 3
+	s.PinchCenter = 3
 	n4 := s.Normalized()
 	if n4.Pinch != -1 {
 		t.Errorf("negative pinch not clamped: %v", n4.Pinch)
 	}
-	if n4.PitchCenter != 1 {
-		t.Errorf("pitch center not clamped from above: %v", n4.PitchCenter)
+	if n4.PinchCenter != 1 {
+		t.Errorf("pinch center not clamped from above: %v", n4.PinchCenter)
 	}
 }
 
@@ -170,7 +170,7 @@ func TestPinchAt(t *testing.T) {
 }
 
 // TestGeneratePinch checks the pinch's contract through Generate: anchors
-// never move, positive pinch pulls every interior level toward the pitch
+// never move, positive pinch pulls every interior level toward the pinch
 // center and negative pinch pushes them away, pinch 0 is the exact identity
 // regardless of the center, and full pinch collapses the interior onto the
 // center's lightness.
@@ -178,17 +178,17 @@ func TestGeneratePinch(t *testing.T) {
 	flat := Generate(DefaultState())
 	s := DefaultState()
 
-	// Pinch 0 with any pitch center reproduces the default palette exactly.
-	s.PitchCenter = 0.8
+	// Pinch 0 with any pinch center reproduces the default palette exactly.
+	s.PinchCenter = 0.8
 	if got := Generate(s); got.Colors[0].Swatches[3].L != flat.Colors[0].Swatches[3].L {
-		t.Error("pinch 0 with a moved pitch center changed the palette")
+		t.Error("pinch 0 with a moved pinch center changed the palette")
 	}
 
 	// Positive pinch concentrates the interior around the center; negative
 	// spreads it toward the anchors. Compare distances to the center's
 	// lightness rather than raw L, since levels on opposite sides move in
 	// opposite directions.
-	s.PitchCenter = 0.5
+	s.PinchCenter = 0.5
 	s.Pinch = 0.5
 	up := Generate(s)
 	s.Pinch = -0.5

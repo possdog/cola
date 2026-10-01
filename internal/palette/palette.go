@@ -81,14 +81,14 @@ type State struct {
 	// (finer dark shades), and -1 bunches them toward the dark end (finer
 	// light shades). See bendT.
 	Bend float64 `json:"bend"`
-	// Pinch and PitchCenter reshape the (already bent) distribution
+	// Pinch and PinchCenter reshape the (already bent) distribution
 	// around one point: Pinch concentrates the steps near that point
 	// (+1 collapses them onto it) or, when negative, pushes them toward
 	// the anchors (-1 flattens every interior level onto the nearer
-	// edge). PitchCenter is the point's position between the anchors
+	// edge). PinchCenter is the point's position between the anchors
 	// (0 = level 50, 1 = level 950). See pinchAt.
 	Pinch       float64     `json:"pinch"`
-	PitchCenter float64     `json:"pitchCenter"`
+	PinchCenter float64     `json:"pinchCenter"`
 	Colors      []ColorSpec `json:"colors"`
 }
 
@@ -127,11 +127,11 @@ func DefaultState() State {
 		Saturation: 1,
 		// Bend is the power-law skew of the luminosity distribution; 0 is
 		// the default, so the default palette keeps the Flexoki spacing.
-		// Pinch/PitchCenter likewise default to their identity (0 pinch;
-		// the pitch center itself only matters once pinch departs from 0).
+		// Pinch/PinchCenter likewise default to their identity (0 pinch;
+		// the pinch center itself only matters once pinch departs from 0).
 		Bend:        0,
 		Pinch:       0,
-		PitchCenter: 0.5,
+		PinchCenter: 0.5,
 		Colors: []ColorSpec{
 			{Name: "base", Hue: 90, Chroma: 0.006},
 			{Name: "red", Hue: 30, Chroma: 0.16},
@@ -160,7 +160,7 @@ func (s State) Normalized() State {
 	out.Saturation = clamp(s.Saturation, 0, 3)
 	out.Bend = clamp(s.Bend, -1, 1)
 	out.Pinch = clamp(s.Pinch, -1, 1)
-	out.PitchCenter = clamp(s.PitchCenter, 0, 1)
+	out.PinchCenter = clamp(s.PinchCenter, 0, 1)
 	// Copy the color slice before clamping in place: ColorSpec holds only
 	// scalars, so a slice copy is a full deep copy. Without it, the writes
 	// below would mutate the caller's backing array — and anything aliasing
@@ -257,11 +257,11 @@ func pinchAt(v, f, c float64) float64 {
 
 // levelT maps a level's base position t (the Flexoki spacing) to its final
 // position between the anchors: the power-law bend first, then the pinch
-// around the pitch center. Pinch runs last so PitchCenter names a position
+// around the pinch center. Pinch runs last so PinchCenter names a position
 // in the final distribution — the level at that spot stays exactly there —
 // and both stages fix 0 and 1, so the anchors are never moved by either.
 func levelT(t float64, s State) float64 {
-	return pinchAt(bendT(t, s.Bend), s.Pinch, s.PitchCenter)
+	return pinchAt(bendT(t, s.Bend), s.Pinch, s.PinchCenter)
 }
 
 // Generate computes every swatch of the palette for the given state.

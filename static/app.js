@@ -911,12 +911,12 @@ async function load() {
   // global sliders it is part of the state, so it persists and rides
   // along with the A/B snapshots.
   bindSlider("bend", "bend", 2);
-  // Pinch and Pitch center reshape the (already bent) distribution around
-  // one point: pinch 0 is the identity, so the pitch center only matters
+  // Pinch and Pinch center reshape the (already bent) distribution around
+  // one point: pinch 0 is the identity, so the pinch center only matters
   // once the pinch departs from 0. Both are part of the state like the
   // other globals, so they persist and ride with the A/B snapshots.
   bindSlider("pinch", "pinch", 2);
-  bindSlider("pitchCenter", "pitchCenter", 2);
+  bindSlider("pinchCenter", "pinchCenter", 2);
   buildColorControls();
   renderActive();
   applyTheme(data.theme);

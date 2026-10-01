@@ -73,9 +73,9 @@ curl --cacert certs/localhost.crt https://127.0.0.1:8443/api/palette
   anchors (-1 flattens every level onto the nearer edge). For any pinch
   below 1 in magnitude the mapping is strictly monotonic, so the lightness
   order can never invert.
-- **Pitch center** — where the pinch focuses, as a position between the
+- **Pinch center** — where the pinch focuses, as a position between the
   anchors (0 = level 50, 1 = level 950; default 0.5). It has no effect while
-  pinch is 0. The pinch runs after the bend, so the pitch center names a spot
+  pinch is 0. The pinch runs after the bend, so the pinch center names a spot
   in the final distribution: the step at that spot stays exactly there.
 - **Saturation** — global chroma multiplier.
 - **Per-color hue and chroma** — precise OKLCH values for each of the nine
@@ -210,7 +210,7 @@ State shape:
   "saturation": 1,
   "bend": 0,
   "pinch": 0,
-  "pitchCenter": 0.5,
+  "pinchCenter": 0.5,
   "colors": [
     { "name": "base", "hue": 90, "chroma": 0.006 },
     { "name": "red", "hue": 30, "chroma": 0.16 }
@@ -227,7 +227,7 @@ endpoints don't look oversaturated).
 
 ```json
 {
-  "state": { "minL": 0.17, "maxL": 0.985, "saturation": 1, "bend": 0, "pinch": 0, "pitchCenter": 0.5, "colors": [] },
+  "state": { "minL": 0.17, "maxL": 0.985, "saturation": 1, "bend": 0, "pinch": 0, "pinchCenter": 0.5, "colors": [] },
   "ab": { "active": "A", "slots": { "A": { "…": "the state shape above" }, "B": null } }
 }
 ```
