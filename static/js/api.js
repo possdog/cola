@@ -45,7 +45,9 @@ async function update() {
     store.palette = data.palette;
     store.view = data.filtered || data.palette;
     renderActive();
-    applyTheme(data.theme);
+    // No argument: the theme resolves the chrome's levels from store.view
+    // through the global light/dark scheme (see theme.js).
+    applyTheme();
   } catch (err) {
     toast(`Failed to update palette: ${err.message}`);
   }

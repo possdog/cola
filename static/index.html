@@ -13,6 +13,12 @@
       <p>Oklab palette designer — equal levels share perceived lightness across every hue.</p>
     </div>
     <div class="actions">
+      <!-- Global light/dark scheme: flips the app chrome and the schemable
+           previews together. Display-only, like the wheel/code modes. -->
+      <div id="scheme" class="segmented" role="group" aria-label="App light/dark theme">
+        <button type="button" class="seg" data-scheme="light" aria-pressed="false">Light</button>
+        <button type="button" class="seg active" data-scheme="dark" aria-pressed="true">Dark</button>
+      </div>
       <button id="copy-css" type="button">Copy CSS variables</button>
       <button id="copy-json" type="button">Copy JSON</button>
       <div id="ab" class="segmented" role="group" aria-label="Palette settings slots">

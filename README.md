@@ -174,8 +174,8 @@ at the top, and only one filter can apply at a time.
   ramps with luminance-picked ink, so the report scores the palette with the
   palette.
 - **Code** — a syntax-highlighted TypeScript sample shown in three programming
-  environments, toggled at the top of the pane beside a Light/Dark theme
-  toggle (display-only preferences, never persisted):
+  environments, toggled at the top of the pane (a display-only preference,
+  never persisted):
   - *Graphical* — a modern editor in the VS Code / Sublime mold: activity
     rail (one SVG icon per chromatic row at its 400 step), file sidebar with
     per-type dots, a yellow git-modified marker, tab strip with per-file
@@ -197,7 +197,7 @@ at the top, and only one filter can apply at a time.
     prompt with the green-allow / red-deny / cyan-always options, a token
     meter, and an input line — the semantic pairs (add vs delete, allow vs
     deny) an agent UI must never let blur together.
-- **Notes** — an Obsidian-style note app, uniform per face under the pane's
+- **Notes** — an Obsidian-style note app, uniform per face under the global
   Light/Dark toggle (an all-light app or an all-dark one, never the mixed
   dark-sidebar/light-editor split): file sidebar with a search field and a
   cyan "New note" button, editor, tag pills in several hues, inline code
@@ -237,23 +237,26 @@ at the top, and only one filter can apply at a time.
   play display-type weight classes on the lightest ground. The finished
   artwork — posters, album covers, duotones, pattern tiles, and the
   editorial spread's abstract "photo" plate — is treated as
-  pre-rendered graphics: the pane's Light/Dark toggle flips the page around
+  pre-rendered graphics: the global Light/Dark toggle flips the page around
   them (background, section headings, the editorial spread, the specimen)
   but the figures themselves render identically in both schemes.
 
-**Light/dark toggle**: the Code, Notes, Landing, and Design previews each
-carry a Light/Dark button pair at the top of the pane (beside the Code
-pane's environment group). Like the wheel layout and code environment
-modes it is a display-only preference: never persisted, applied by
-redrawing from the already-fetched response. The dark face is the level
-complement — every level resolves to its opposite across the ramp's
-midpoint (50↔950, 200↔800, 500 fixed; a bijection on all thirteen
-levels) — so every authored pairing keeps its perceived-lightness gap
-with the faces swapped, which is exactly the guarantee the
-equal-lightness ramp exists to make. Defaults match each mock's native
-face (the code environments are dark, the other three light), and copy
-that names levels is generated from the resolved levels so the
-labels stay honest after a toggle.
+**Light/dark toggle**: a single global setting — the Light/Dark pill in the
+header — that flips the whole app at once: the app's own chrome (see
+Dogfooding below) plus the Code, Notes, Landing, and Design previews. Like
+the wheel layout and code environment modes it is a display-only
+preference: never persisted, applied by restyling from the already-fetched
+response with no new request. The dark face is the level complement —
+every level resolves to its opposite across the ramp's midpoint
+(50↔950, 200↔800, 500 fixed; a bijection on all thirteen levels) — so
+every authored pairing keeps its perceived-lightness gap with the faces
+swapped, which is exactly the guarantee the equal-lightness ramp exists
+to make. Each surface keeps its own native face (the app chrome and the
+code environments are dark, the other three previews light) and is
+complemented only when the global scheme is not its own, so a natively
+dark mock never renders double-flipped. The default is Dark, the chrome's
+native face. Copy that names levels is generated from the resolved levels
+so the labels stay honest after a toggle.
 
 The previews re-render live from the palette being designed, so moving a
 slider restyles them exactly like the grid; they also honor the view filters
@@ -263,12 +266,14 @@ from under you, even in panes that scroll inside nested mock regions.
 **Dogfooding**: the app's own interface is themed from the palette being
 designed. Backgrounds, borders, and text come from the base ramp (950 through
 800, 100, 400), the accent color is cyan-400, and the armed reset button uses
-red-400. Every API response carries this `theme` object, and the UI applies
-it live — so moving a slider restyles the very controls you're dragging. View
-filters extend the dogfooding: when one is active the theme is derived from
-the filtered copy, so the whole UI (radio buttons, sliders, tabs) shows the
-filtered appearance too — grayscale chrome under grayscale, a warm interface
-under blue light.
+red-400. The UI resolves these levels from the fetched palette itself,
+through the global light/dark scheme, so moving a slider restyles the very
+controls you're dragging and the Light/Dark pill flips the chrome along with
+the previews. Every API response also carries a `theme` object with the same
+mapping on its dark face, for direct API consumers. View filters extend the
+dogfooding: when one is active the UI reads the filtered copy, so the whole
+UI (radio buttons, sliders, tabs) shows the filtered appearance too —
+grayscale chrome under grayscale, a warm interface under blue light.
 
 ## HTTP API
 

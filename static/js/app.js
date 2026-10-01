@@ -13,9 +13,6 @@ import { setABButton, copyAB, swapAB } from "./ab.js";
 import { paletteToCSS, paletteToJSON } from "./exports.js";
 import { renderWheel, setWheelMode } from "./preview/wheel.js";
 import { renderCode, setCodeMode } from "./preview/code.js";
-import { renderNotes } from "./preview/notes.js";
-import { renderLanding } from "./preview/landing.js";
-import { renderDesign } from "./preview/design.js";
 import { setScheme } from "./preview/scheme.js";
 
 // ---- reset -----------------------------------------------------------------
@@ -65,7 +62,7 @@ async function resetPalette() {
     globalSync.forEach((sync) => sync());
     buildColorControls();
     renderActive();
-    applyTheme(data.theme);
+    applyTheme();
     toast("Palette reset to defaults");
   } catch (err) {
     toast(`Reset failed: ${err.message}`);
@@ -97,7 +94,7 @@ async function load() {
   bindSlider("pinchCenter", "pinchCenter", 2);
   buildColorControls();
   renderActive();
-  applyTheme(data.theme);
+  applyTheme();
 
   // Preview tabs: the panes share the palette fetching pipeline; a tab click
   // just swaps visibility and redraws the newly shown pane.
@@ -160,22 +157,25 @@ async function load() {
     const modeBtn = e.target.closest(".code-mode-btn");
     if (modeBtn && setCodeMode(modeBtn.dataset.mode)) renderCode();
   });
-  // Light/dark scheme toggles on the Code, Notes, Landing, and Design
-  // previews. Like the mode buttons this is a display-only preference: the
-  // redraw complements the levels of the already-fetched response, so no
-  // new request is needed and nothing is persisted.
-  const SCHEME_RENDERS = {
-    "#code-preview": renderCode,
-    "#notes-preview": renderNotes,
-    "#landing-preview": renderLanding,
-    "#design-preview": renderDesign,
-  };
-  for (const [sel, render] of Object.entries(SCHEME_RENDERS)) {
-    $(sel).addEventListener("click", (e) => {
-      const btn = e.target.closest(".scheme-btn");
-      if (btn && setScheme(btn.dataset.tab, btn.dataset.scheme)) render();
+  // Global light/dark scheme (the header's Light/Dark pill): flips the app
+  // chrome and the Code, Notes, Landing, and Design previews together.
+  // Like the mode buttons this is a display-only preference: theme.js
+  // restyles the chrome and the pane redraw complements the levels of the
+  // already-fetched response, so no new request is needed and nothing is
+  // persisted. Only the active pane is redrawn here; the other panes
+  // re-render with the new scheme when their tab is next shown.
+  const schemePill = $("#scheme");
+  schemePill.addEventListener("click", (e) => {
+    const btn = e.target.closest(".seg");
+    if (!btn || !setScheme(btn.dataset.scheme)) return;
+    schemePill.querySelectorAll(".seg").forEach((b) => {
+      const on = b === btn;
+      b.classList.toggle("active", on);
+      b.setAttribute("aria-pressed", on);
     });
-  }
+    applyTheme();
+    renderActive();
+  });
   $("#copy-css").addEventListener("click", () => copyText(paletteToCSS(), "CSS variables copied"));
   $("#copy-json").addEventListener("click", () => copyText(paletteToJSON(), "JSON copied"));
   // A/B: restore the server-persisted record — both slots and which one is

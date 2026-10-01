@@ -3,7 +3,7 @@
 // colored entirely from the palette through a scheme-bound hexOf lookup.
 
 import { $, esc, setPaneHTML } from "../util.js";
-import { hexFor, schemeToggle } from "./scheme.js";
+import { hexFor } from "./scheme.js";
 
 // Code preview modes, modeled on the three environments a palette ships in:
 // a graphical editor ("graphical", VS Code / Sublime style), a terminal TUI
@@ -53,8 +53,8 @@ const CODE_SAMPLE = [
 // Token colors, shared by all three environments: a keyword is red-400 in a
 // GUI editor and in a terminal TUI alike, so switching modes shows the same
 // token mapping across very different surfaces. `hex` is the scheme-bound
-// lookup (see renderCode), so the toggle re-inks the tokens too — red-400
-// keywords become red-600 on the light face.
+// lookup (see renderCode), so the global scheme re-inks the tokens too —
+// red-400 keywords become red-600 on the light face.
 function codeTokenColors(hex) {
   return {
     kw: hex("red", 400),
@@ -328,8 +328,8 @@ function renderCodeAgent(hex) {
 
 export function renderCode() {
   // Scheme-bound lookup: the environments are authored on the dark face,
-  // and the toggle complements every level so the same mock reads as a
-  // light editor / light terminal / light agent chat.
+  // and the global scheme complements every level so the same mock reads
+  // as a light editor / light terminal / light agent chat.
   const hex = hexFor("code");
   const btn = (m, label) =>
     `<button type="button" class="code-mode-btn${codeMode === m ? " active" : ""}" aria-pressed="${codeMode === m}" data-mode="${m}">${label}</button>`;
@@ -340,8 +340,6 @@ export function renderCode() {
       <div class="code-mode" role="group" aria-label="Code environment">
         ${btn("graphical", "Graphical")}${btn("terminal", "Terminal")}${btn("agent", "Agent")}
       </div>
-      <span class="preview-tools-sep"></span>
-      ${schemeToggle("code")}
     </div>
     ${body}`);
 }

@@ -44,7 +44,9 @@ static/js/                  ES modules: app.js (entry + wiring), store.js (share
 - All color math is server-side. The frontend never computes colors; it
   fetches `/api/palette` and renders. Keep it that way.
 - Dogfooding: every API response carries a `theme` derived from the current
-  palette; the UI is styled from it live. When changing response shapes,
+  palette; the API-facing mapping stays server-side, while the UI styles
+  itself from the fetched view through the global light/dark scheme
+  (`theme.js`). When changing response shapes,
   check `static/js/` consumers (swatch.js and the preview modules read the
   response most closely).
 - Go doc comments in this codebase explain the *why* behind non-obvious
@@ -59,9 +61,9 @@ relevant code; `README.md` documents the user-facing behavior in depth.
 
 - Palette state and the A/B record are the only persisted things. Every
   other preference (wheel layout, gamut camera and chroma scale, code
-  environment, per-pane light/dark face) is display-only: never persisted,
-  never posted. Blue-light intensity is posted per request but is not part
-  of the state.
+  environment, the global light/dark scheme) is display-only: never
+  persisted, never posted. Blue-light intensity is posted per request but
+  is not part of the state.
 - View filters affect only the `filtered` response copy — never the real
   palette, exports, or the persisted state. Multiple filters compose in a
   fixed server-side order: CVD simulations, then grayscale, then blue light.
@@ -84,10 +86,13 @@ relevant code; `README.md` documents the user-facing behavior in depth.
   through `setPaneHTML` in `static/js/util.js`: it snapshots and replays
   the scroll offsets of the pane and any scrolled descendant, so a
   re-render never scrolls the preview out from under the user.
-- The light/dark toggle maps every level to its complement (50↔950, 500
-  fixed). Copy that names levels (pairing chips, legends, blurbs) must be
-  generated from the resolved levels, not the authored ones, so labels
-  stay correct after a toggle.
+- The light/dark toggle is one global setting (header pill), not per-pane:
+  it flips the app chrome and the Code, Notes, Landing, and Design previews
+  together by mapping every level to its complement (50↔950, 500 fixed).
+  Each surface keeps its own native face, so a mock is complemented only
+  when the global scheme is not its own. Copy that names levels (pairing
+  chips, legends, blurbs) must be generated from the resolved levels, not
+  the authored ones, so labels stay correct after a toggle.
 
 ## Dangerous operations and boundaries
 

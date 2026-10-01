@@ -3,7 +3,7 @@
 
 import { store } from "../store.js";
 import { $, esc, setPaneHTML } from "../util.js";
-import { hexFor, levelFor, schemeToggle } from "./scheme.js";
+import { hexFor, levelFor } from "./scheme.js";
 
 // Width mixes for the usage chart's stacked bars. A handful of fixed ratios
 // rotated by row index, so the bars read as distinct data series instead of
@@ -18,8 +18,8 @@ const BRAND_MIXES = [
 
 export function renderLanding() {
   // Scheme-bound lookups: the page is authored on its light face, and the
-  // toggle complements every level so the whole brand site flips dark. lvl
-  // keeps the section copy naming the levels actually on screen.
+  // global scheme complements every level so the whole brand site flips
+  // dark. lvl keeps the section copy naming the levels actually on screen.
   const hex = hexFor("landing");
   const lvl = (n) => levelFor("landing", n);
   // The light end of the ramps gets most of the work here — the app's own
@@ -28,7 +28,7 @@ export function renderLanding() {
   // live chromatic rows so renames carry through, and hexOf's gray fallback
   // keeps every piece visible even when a referenced level goes missing.
   // Colors resolve through the scheme-bound hex, so the same page renders
-  // its dark face when the toolbar toggle is switched.
+  // its dark face when the global scheme is switched.
   const stripRow = store.view.colors.find((c) => c.name === "cyan") || store.view.colors[0];
   const strip = stripRow.swatches
     .map((s) => `<span style="background:${s.hex}"></span>`)
@@ -156,7 +156,6 @@ export function renderLanding() {
     </div>`;
 
   setPaneHTML($("#landing-preview"), `
-    <div class="preview-tools">${schemeToggle("landing")}</div>
     <div class="brand-page" style="background:${hex("base", 50)}">
       <nav class="brand-nav">
         <span class="brand-mark" style="background:${hex("cyan", 500)};color:${hex("base", 50)}">K</span>

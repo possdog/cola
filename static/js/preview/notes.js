@@ -1,11 +1,11 @@
 // Notes preview tab: a note-taking app mock demonstrating the standard
 // pairings every ramp must provide. Authored as an all-light UI — the
-// pane's Light/Dark toggle complements every level for the all-dark face,
+// global Light/Dark scheme complements every level for the all-dark face,
 // so the app never renders as a mixed light/dark split.
 
 import { store } from "../store.js";
 import { $, esc, setPaneHTML } from "../util.js";
-import { hexFor, levelFor, schemeToggle } from "./scheme.js";
+import { hexFor, levelFor } from "./scheme.js";
 
 // Tag pills cycle through several chromatic rows: a pill's ground is the
 // row's level-100 step and its ink the level-800 step — the standard pairing
@@ -21,8 +21,8 @@ const NOTES_TAGS = [
 
 export function renderNotes() {
   // Scheme-bound lookups: the mock is authored as an all-light UI, and the
-  // toggle complements every level so the whole app flips to its all-dark
-  // face.
+  // global scheme complements every level so the whole app flips to its
+  // all-dark face.
   const hex = hexFor("notes");
   const lvl = (n) => levelFor("notes", n);
   const tag = ([name, label]) =>
@@ -56,7 +56,6 @@ export function renderNotes() {
     .join("");
 
   setPaneHTML($("#notes-preview"), `
-    <div class="preview-tools">${schemeToggle("notes")}</div>
     <div class="notes-app">
       <aside class="notes-side" style="background:${hex("base", 100)}">
         <div class="notes-search" style="background:${hex("base", 200)};border-color:${hex("base", 300)};color:${hex("base", 600)}">Search notes…</div>

@@ -7,16 +7,17 @@
 import { store } from "../store.js";
 import { $, esc, setPaneHTML } from "../util.js";
 import { hexOf } from "../swatch.js";
-import { hexFor, levelFor, schemeToggle } from "./scheme.js";
+import { hexFor, levelFor } from "./scheme.js";
 
 export function renderDesign() {
   // Scheme-bound lookups: the page itself (background, section headings,
-  // editorial spread, type specimen) is authored on its light face, and the
-  // toggle complements every level so it flips dark. The finished artwork —
-  // posters, album covers, duotones, pattern tiles — is not part of that
-  // flip: those figures are treated as pre-rendered graphics and render
-  // identically in both schemes, via the raw hexOf lookup below. lvl keeps
-  // the section copy naming the levels actually on screen.
+  // editorial spread, type specimen) is authored on its light face, and
+  // the global scheme complements every level so it flips dark. The
+  // finished artwork — posters, album covers, duotones, pattern tiles —
+  // is not part of that flip: those figures are treated as pre-rendered
+  // graphics and render identically in both schemes, via the raw hexOf
+  // lookup below. lvl keeps the section copy naming the levels actually
+  // on screen.
   const hex = hexFor("design");
   const lvl = (n) => levelFor("design", n);
   const chrom = store.view.colors.filter((c) => c.name !== "base");
@@ -144,7 +145,6 @@ export function renderDesign() {
     </div>`).join("");
 
   setPaneHTML($("#design-preview"), `
-    <div class="preview-tools">${schemeToggle("design")}</div>
     <div class="design-page" style="background:${hex("base", 50)}">
       ${sec("Posters", "One poster per ramp: the 500 step as ground, oversized level-50 ink, a 200-step disc. Under the grayscale filter the disc must stay visibly lighter than its ground. The posters are finished art and render identically in both schemes.")}
       <div class="design-posters">${posters}</div>
