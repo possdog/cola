@@ -492,11 +492,11 @@ func TestPinchJSONContract(t *testing.T) {
 	}
 
 	// Out-of-range values are clamped server-side, not echoed raw.
-	if got := postPalette(t, s, `{"pinch":42}`); got.State.Pinch != 1 {
-		t.Errorf("pinch 42 clamped to %v, want 1", got.State.Pinch)
+	if got := postPalette(t, s, `{"pinch":42}`); got.State.Pinch != 0.5 {
+		t.Errorf("pinch 42 clamped to %v, want 0.5", got.State.Pinch)
 	}
-	if got := postPalette(t, s, `{"pinch":-42}`); got.State.Pinch != -1 {
-		t.Errorf("pinch -42 clamped to %v, want -1", got.State.Pinch)
+	if got := postPalette(t, s, `{"pinch":-42}`); got.State.Pinch != -0.5 {
+		t.Errorf("pinch -42 clamped to %v, want -0.5", got.State.Pinch)
 	}
 	if got := postPalette(t, s, `{"pinchCenter":2}`); got.State.PinchCenter != 1 {
 		t.Errorf("pinchCenter 2 clamped to %v, want 1", got.State.PinchCenter)

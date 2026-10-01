@@ -66,13 +66,13 @@ curl --cacert certs/localhost.crt https://127.0.0.1:8443/api/palette
   Levels 50 and 950 are fixed points of the power law, so the anchors never
   move, and the skew can never invert the ramp's lightness order.
 - **Pinch** — bunches the (already bent) steps around one point, centered at
-  0 (no pinch). Each side of that point is remapped with the exponent
-  (1+f)/(1-f), so both directions feel symmetric in strength: positive
-  values concentrate the steps near the point (+1 collapses the whole ramp
-  onto it, anchors included) and negative values push them toward the
-  anchors (-1 flattens every level onto the nearer edge). For any pinch
-  below 1 in magnitude the mapping is strictly monotonic, so the lightness
-  order can never invert.
+  0 (no pinch) and clamped to ±0.5. Each side of that point is remapped with
+  the exponent (1+f)/(1-f), so both directions feel symmetric in strength:
+  positive values concentrate the steps near the point and negative values
+  push them toward the anchors. Throughout the clamped range the mapping is
+  strictly monotonic, so the lightness order can never invert; the ±1
+  extremes of the underlying curve, where the ramp would degenerate, stay
+  out of reach.
 - **Pinch center** — where the pinch focuses, as a position between the
   anchors (0 = level 50, 1 = level 950; default 0.5). It has no effect while
   pinch is 0. The pinch runs after the bend, so the pinch center names a spot

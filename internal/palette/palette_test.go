@@ -118,7 +118,7 @@ func TestNormalizedClamps(t *testing.T) {
 	s.Pinch = 9
 	s.PinchCenter = -3
 	n3 := s.Normalized()
-	if n3.Pinch != 1 {
+	if n3.Pinch != 0.5 {
 		t.Errorf("pinch not clamped: %v", n3.Pinch)
 	}
 	if n3.PinchCenter != 0 {
@@ -127,7 +127,7 @@ func TestNormalizedClamps(t *testing.T) {
 	s.Pinch = -9
 	s.PinchCenter = 3
 	n4 := s.Normalized()
-	if n4.Pinch != -1 {
+	if n4.Pinch != -0.5 {
 		t.Errorf("negative pinch not clamped: %v", n4.Pinch)
 	}
 	if n4.PinchCenter != 1 {
@@ -217,19 +217,6 @@ func TestGeneratePinch(t *testing.T) {
 					t.Errorf("%s level %d: negative pinch distance %v not above flat %v",
 						row.Name, sw.Level, gotDist, wantDist)
 				}
-			}
-		}
-	}
-
-	// Full pinch collapses every interior level onto the center's
-	// lightness — the whole ramp becomes the two anchors plus one step.
-	s.Pinch = 1
-	collapsed := Generate(s)
-	for _, row := range collapsed.Colors {
-		for j := 1; j < last; j++ {
-			if got := row.Swatches[j].L; math.Abs(got-centerL) > 1e-9 {
-				t.Errorf("%s level %d: full pinch L %v, want center L %v",
-					row.Name, row.Swatches[j].Level, got, centerL)
 			}
 		}
 	}

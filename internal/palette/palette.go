@@ -82,11 +82,13 @@ type State struct {
 	// light shades). See bendT.
 	Bend float64 `json:"bend"`
 	// Pinch and PinchCenter reshape the (already bent) distribution
-	// around one point: Pinch concentrates the steps near that point
-	// (+1 collapses them onto it) or, when negative, pushes them toward
-	// the anchors (-1 flattens every interior level onto the nearer
-	// edge). PinchCenter is the point's position between the anchors
-	// (0 = level 50, 1 = level 950). See pinchAt.
+	// around one point: Pinch concentrates the steps near that point or,
+	// when negative, pushes them toward the anchors. It is clamped to
+	// +/-0.5, well short of the +/-1 extremes where the curve degenerates
+	// (everything onto the center, resp. onto the nearer edge), so every
+	// slider position keeps a useful, strictly monotonic ramp.
+	// PinchCenter is the point's position between the anchors (0 = level
+	// 50, 1 = level 950). See pinchAt.
 	Pinch       float64     `json:"pinch"`
 	PinchCenter float64     `json:"pinchCenter"`
 	Colors      []ColorSpec `json:"colors"`
@@ -159,7 +161,7 @@ func (s State) Normalized() State {
 	}
 	out.Saturation = clamp(s.Saturation, 0, 3)
 	out.Bend = clamp(s.Bend, -1, 1)
-	out.Pinch = clamp(s.Pinch, -1, 1)
+	out.Pinch = clamp(s.Pinch, -0.5, 0.5)
 	out.PinchCenter = clamp(s.PinchCenter, 0, 1)
 	// Copy the color slice before clamping in place: ColorSpec holds only
 	// scalars, so a slice copy is a full deep copy. Without it, the writes
@@ -217,9 +219,10 @@ func bendT(t, bend float64) float64 {
 // symmetric in strength even when c sits off the middle; a center pinned at
 // an edge degenerates to the constant c. For |f| < 1 the mapping fixes 0, c,
 // and 1 and is strictly monotonic, so the ramp's lightness order can never
-// invert; at the clamped extremes it degenerates instead (f = 1 collapses
-// everything onto c, anchors included; f = -1 flattens everything onto the
-// nearer edge). Ported from the reference TypeScript implementation.
+// invert; at f = +/-1 it degenerates instead (f = 1 collapses everything
+// onto c, anchors included; f = -1 flattens everything onto the nearer
+// edge) — extremes the state's +/-0.5 clamp deliberately keeps out of
+// reach. Ported from the reference TypeScript implementation.
 func pinchAt(v, f, c float64) float64 {
 	// Short-circuit the identity, like bendT: the general path below is
 	// algebraically v but not bit-identical to it, and a zero pinch must
