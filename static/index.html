@@ -36,18 +36,18 @@
         <h2>Global</h2>
         <label class="slider-group">
           <span class="label">Lightest L <em class="hint">(level 50)</em></span>
-          <input type="range" id="maxL" min="0.85" max="0.995" step="0.005">
           <span class="val" id="maxL-val"></span>
+          <input type="range" id="maxL" min="0.85" max="0.995" step="0.005">
         </label>
         <label class="slider-group">
           <span class="label">Darkest L <em class="hint">(level 950)</em></span>
-          <input type="range" id="minL" min="0.05" max="0.4" step="0.005">
           <span class="val" id="minL-val"></span>
+          <input type="range" id="minL" min="0.05" max="0.4" step="0.005">
         </label>
         <label class="slider-group">
           <span class="label">Saturation</span>
-          <input type="range" id="saturation" min="0" max="2" step="0.05">
           <span class="val" id="saturation-val"></span>
+          <input type="range" id="saturation" min="0" max="2" step="0.05">
         </label>
         <!-- Dividers split Global into its three sub-sections: the base
              palette sliders, the tint block, and the level-distribution
@@ -61,40 +61,40 @@
              pink-teal-pink (see buildColorControls in controls.js). -->
         <label class="slider-group">
           <span class="label">Tint hue</span>
+          <span class="val" id="tintHue-val"></span>
           <input type="range" id="tintHue" min="0" max="360" step="1" value="30"
                  style="background:linear-gradient(90deg, oklch(60% 0.15 0), oklch(60% 0.15 60), oklch(60% 0.15 120), oklch(60% 0.15 180), oklch(60% 0.15 240), oklch(60% 0.15 300), oklch(60% 0.15 360))">
-          <span class="val" id="tintHue-val"></span>
         </label>
         <label class="slider-group">
           <span class="label">Tint luminosity <em class="hint">(Oklab L of the tint)</em></span>
-          <input type="range" id="tintL" min="0.02" max="0.995" step="0.005">
           <span class="val" id="tintL-val"></span>
+          <input type="range" id="tintL" min="0.02" max="0.995" step="0.005">
         </label>
         <label class="slider-group">
           <span class="label">Tint chroma</span>
-          <input type="range" id="tintChroma" min="0" max="0.4" step="0.005">
           <span class="val" id="tintChroma-val"></span>
+          <input type="range" id="tintChroma" min="0" max="0.4" step="0.005">
         </label>
         <label class="slider-group">
           <span class="label">Tint intensity <em class="hint">(0 = off, capped at 0.25)</em></span>
-          <input type="range" id="tintIntensity" min="0" max="0.25" step="0.01" value="0">
           <span class="val" id="tintIntensity-val"></span>
+          <input type="range" id="tintIntensity" min="0" max="0.25" step="0.01" value="0">
         </label>
         <hr class="divider">
         <label class="slider-group">
           <span class="label">Bend <em class="hint">(power-law lightness skew)</em></span>
-          <input type="range" id="bend" min="-1" max="1" step="0.05" value="0">
           <span class="val" id="bend-val"></span>
+          <input type="range" id="bend" min="-1" max="1" step="0.05" value="0">
         </label>
         <label class="slider-group">
           <span class="label">Pinch <em class="hint">(bunch steps around a point)</em></span>
-          <input type="range" id="pinch" min="-0.5" max="0.5" step="0.05" value="0">
           <span class="val" id="pinch-val"></span>
+          <input type="range" id="pinch" min="-0.5" max="0.5" step="0.05" value="0">
         </label>
         <label class="slider-group">
           <span class="label">Pinch center <em class="hint">(0 = level 50, 1 = level 950)</em></span>
-          <input type="range" id="pinchCenter" min="0" max="1" step="0.05" value="0.5">
           <span class="val" id="pinchCenter-val"></span>
+          <input type="range" id="pinchCenter" min="0" max="1" step="0.05" value="0.5">
         </label>
       </section>
 
@@ -137,8 +137,8 @@
         <div class="filter-slider" id="bluelight-slider" hidden>
           <label class="slider-group">
             <span class="label">Intensity</span>
-            <input type="range" id="blueLight" min="0" max="1" step="0.05" value="0.5">
             <span class="val" id="blueLight-val"></span>
+            <input type="range" id="blueLight" min="0" max="1" step="0.05" value="0.5">
           </label>
         </div>
       </section>

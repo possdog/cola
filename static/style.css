@@ -140,6 +140,11 @@ main {
   color: var(--text-dim);
 }
 
+/* Two-column grid: the first two children share the header line (label
+   left, value right), the input spans the full width below. Markup order
+   is a contract: the value span must precede the input — grid
+   auto-placement only moves forward, so input-first drops the value below
+   the track instead of beside the label. */
 .slider-group {
   display: grid;
   grid-template-columns: 1fr auto;
