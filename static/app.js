@@ -612,6 +612,40 @@ async function resetPalette() {
   }
 }
 
+// ---- A/B slots ---------------------------------------------------------------
+
+// The A/B button compares two variants of the settings: clicking saves the
+// current state into the active slot, then loads the other slot. The slots
+// hold full settings snapshots in the page only — the server keeps
+// persisting just the active palette — so a reload starts a fresh A and an
+// empty B.
+let abActive = "A";
+const abSlots = { A: null, B: null };
+
+// Plain-JSON state, so a JSON round trip is a complete deep copy.
+const cloneState = (s) => JSON.parse(JSON.stringify(s));
+
+function setABButton() {
+  $("#ab").textContent = `A/B: ${abActive}`;
+}
+
+async function swapAB() {
+  abSlots[abActive] = cloneState(state);
+  const other = abActive === "A" ? "B" : "A";
+  // Switching to an empty slot seeds it with the current settings, so the
+  // first toggle is a no-op and the two variants only diverge from there.
+  abSlots[other] = abSlots[other] || cloneState(state);
+  abActive = other;
+  state = cloneState(abSlots[other]);
+  // Move the bound global sliders to the loaded values and rebuild the
+  // per-color rows (fresh listeners included), then regenerate — the same
+  // plumbing as reset, since a slot swap is a full state replacement.
+  globalSync.forEach((sync) => sync());
+  buildColorControls();
+  setABButton();
+  await update();
+}
+
 // ---- exports -------------------------------------------------------------
 
 function paletteToCSS() {
@@ -723,6 +757,11 @@ async function load() {
   });
   $("#copy-css").addEventListener("click", () => copyText(paletteToCSS(), "CSS variables copied"));
   $("#copy-json").addEventListener("click", () => copyText(paletteToJSON(), "JSON copied"));
+  // A/B: slot A starts as the loaded settings; B stays empty until the
+  // first toggle seeds it.
+  abSlots.A = cloneState(state);
+  setABButton();
+  $("#ab").addEventListener("click", swapAB);
   $("#reset").addEventListener("click", () => {
     if (!resetArmed) {
       armReset();

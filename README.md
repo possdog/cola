@@ -62,9 +62,15 @@ curl --cacert certs/localhost.crt https://127.0.0.1:8443/api/palette
   unconstrained.
 
 Click any swatch to copy its hex. The header buttons copy the whole palette
-as CSS custom properties (`--base-50: ...`) or JSON. **Reset to defaults**
-restores the built-in palette (two clicks: the first arms the button and the
-second confirms); the restored defaults are persisted like any other change.
+as CSS custom properties (`--base-50: ...`) or JSON. **A/B** (next to the
+copy buttons) compares two variants of the settings: clicking it saves the
+current settings into the active slot and loads the other, so toggling
+flips between the two. Slots are page-local — the server keeps persisting
+only the active palette — and switching to the still-empty slot seeds it
+with the current settings, so the first toggle changes nothing by itself.
+**Reset to defaults** restores the built-in palette (two clicks: the first
+arms the button and the second confirms); the restored defaults are
+persisted like any other change.
 
 **View filters** (radio buttons, display-only — copies and exports always use
 the real palette). The filters are alternate views of the same palette, so
