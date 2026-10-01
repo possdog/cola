@@ -76,7 +76,7 @@ button.armed:hover {
 .segmented {
   display: inline-flex;
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--radius);
   overflow: hidden;
   /* Fills the subpixel sliver the halves' rounded ends can leave against
      the container's border; matches the inactive half's fill. */
@@ -90,11 +90,11 @@ button.armed:hover {
   font-size: 13px;
 }
 /* Each half rounds only its outer end, so the active half's raised fill and
-   inset ring follow the pill's curve; a square half ends in the clipped
-   corners seen before. The halves' radius lands concentric with the
-   container's border (999px clamps to half of each element's height). */
-.segmented .seg:first-child { border-radius: 999px 0 0 999px; }
-.segmented .seg:last-child { border-radius: 0 999px 999px 0; }
+   inset ring follow the container's curve; a square half ends in clipped
+   corners. Subtract the container's 1px border so the halves' radii stay
+   concentric with its inner edge. */
+.segmented .seg:first-child { border-radius: calc(var(--radius) - 1px) 0 0 calc(var(--radius) - 1px); }
+.segmented .seg:last-child { border-radius: 0 calc(var(--radius) - 1px) calc(var(--radius) - 1px) 0; }
 .segmented .seg + .seg { border-left: 1px solid var(--border); }
 .segmented .seg:hover { color: var(--accent); }
 .segmented .seg.active {
@@ -272,7 +272,7 @@ input[type="range"]::-moz-range-thumb {
   background: var(--bg-panel);
   color: var(--text-dim);
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--radius);
   padding: 5px 14px;
   font-size: 13px;
 }
@@ -383,7 +383,7 @@ input[type="range"]::-moz-range-thumb {
   background: var(--bg-panel);
   color: var(--text-dim);
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--radius);
   padding: 4px 12px;
   font-size: 12px;
 }
