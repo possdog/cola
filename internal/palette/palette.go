@@ -29,9 +29,11 @@ const hueWindow = 30
 // sits near 30 degrees, so red is centered there rather than at 0. The base
 // row is near-neutral, so its hue is unconstrained.
 var idealHue = map[string]float64{
-	"red":     30,
-	"orange":  55,
-	"yellow":  110,
+	"red":    30,
+	"orange": 55,
+	// 90, not pure sRGB yellow's ~110: at 110 the default reads chartreuse,
+	// i.e. skewed green next to the orange and green rows around it.
+	"yellow":  90,
 	"green":   145,
 	"cyan":    195,
 	"blue":    264,
@@ -113,7 +115,7 @@ func DefaultState() State {
 			{Name: "base", Hue: 90, Chroma: 0.006},
 			{Name: "red", Hue: 30, Chroma: 0.16},
 			{Name: "orange", Hue: 55, Chroma: 0.15},
-			{Name: "yellow", Hue: 110, Chroma: 0.16},
+			{Name: "yellow", Hue: 90, Chroma: 0.16},
 			{Name: "green", Hue: 145, Chroma: 0.14},
 			{Name: "cyan", Hue: 195, Chroma: 0.12},
 			{Name: "blue", Hue: 264, Chroma: 0.15},
