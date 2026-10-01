@@ -240,7 +240,11 @@ at the top, and only one filter can apply at a time.
   equal-lightness check in reverse); geometric pattern
   tiles (disc, half disc, quarter, and bars from the 300/600/800 trio on
   a 100 ground); and a type specimen where each ramp's 300/600/900 steps
-  play display-type weight classes on the lightest ground.
+  play display-type weight classes on the lightest ground. The finished
+  artwork — posters, album covers, duotones, pattern tiles — is treated as
+  pre-rendered graphics: the pane's Light/Dark toggle flips the page around
+  them (background, section headings, the editorial spread, the specimen)
+  but the figures themselves render identically in both schemes.
 
 **Light/dark toggle**: the Code, Notes, Landing, and Design previews each
 carry a Light/Dark button pair at the top of the pane (beside the Code
