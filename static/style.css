@@ -339,10 +339,36 @@ input[type="range"]::-moz-range-thumb {
 /* preserveAspectRatio keeps the 1000x1000 viewBox letterboxed inside whatever
    box the pane gives it, so the wheel is always a circle. */
 .wheel-svg { flex: 1; min-height: 0; width: 100%; }
+/* Layout-mode toggle (By hue / Fixed), rendered above the wheel by app.js.
+   Styled like the tab pills but smaller; the generic button rules set a
+   larger padding and raised background, so those are re-overridden here. */
+.wheel-mode { display: flex; gap: 6px; }
+.wheel-mode-btn {
+  background: var(--bg-panel);
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 12px;
+}
+.wheel-mode-btn:hover { border-color: var(--accent); color: var(--text); }
+.wheel-mode-btn.active {
+  background: var(--bg-raised);
+  border-color: var(--accent);
+  color: var(--text);
+}
 .wheel-ring { fill: none; stroke: var(--border); stroke-width: 1; opacity: 0.55; }
 .wheel-label { fill: var(--text-dim); font-size: 16px; text-anchor: middle; }
+.wheel-name {
+  fill: var(--text-dim);
+  font-size: 16px;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
 .wheel-dot { cursor: pointer; }
 .wheel-dot:hover { stroke: var(--text); stroke-width: 2.5; }
+.wheel-wedge { cursor: pointer; }
+.wheel-wedge:hover { stroke: var(--text); stroke-width: 2.5; }
 .wheel-legend { display: flex; align-items: center; gap: 3px; }
 .wheel-legend .legend-name {
   font-size: 12px;
