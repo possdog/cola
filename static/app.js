@@ -627,16 +627,16 @@ const abSlots = { A: null, B: null };
 const cloneState = (s) => JSON.parse(JSON.stringify(s));
 
 function setABButton() {
-  // The segmented control marks the active half; the copy button's label
-  // shows the copy direction. Halves are found by their data-slot, the same
-  // attribute the click handler keys on, so markup and JS share one source
-  // of truth.
-  document.querySelectorAll("#ab .seg").forEach((seg) => {
+  // The segmented control marks the active half; the middle arrow points in
+  // the copy direction (toward the slot a copy would overwrite). Halves are
+  // found by their data-slot, the same attribute the click handler keys on,
+  // so markup and JS share one source of truth.
+  document.querySelectorAll("#ab .seg[data-slot]").forEach((seg) => {
     const on = seg.dataset.slot === abActive;
     seg.classList.toggle("active", on);
     seg.setAttribute("aria-pressed", on);
   });
-  $("#ab-copy").textContent = `${abActive} → ${abActive === "A" ? "B" : "A"}`;
+  $("#ab-copy").textContent = abActive === "A" ? "→" : "←";
 }
 
 // Copy-to-other overwrites the inactive slot with the active settings
@@ -781,13 +781,15 @@ async function load() {
   // first toggle seeds it.
   abSlots.A = cloneState(state);
   setABButton();
-  // Segmented A/B: clicking the inactive half swaps slots; clicking the
-  // active half is a no-op.
+  // Segmented A/B: the halves swap slots (clicking the active half is a
+  // no-op); the middle arrow, the only segment without a data-slot, copies
+  // the active slot into the other.
   $("#ab").addEventListener("click", (e) => {
     const seg = e.target.closest(".seg");
-    if (seg && seg.dataset.slot !== abActive) swapAB();
+    if (!seg) return;
+    if (!seg.dataset.slot) copyAB();
+    else if (seg.dataset.slot !== abActive) swapAB();
   });
-  $("#ab-copy").addEventListener("click", copyAB);
   $("#reset").addEventListener("click", () => {
     if (!resetArmed) {
       armReset();

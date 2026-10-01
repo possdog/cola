@@ -15,11 +15,11 @@
     <div class="actions">
       <button id="copy-css" type="button">Copy CSS variables</button>
       <button id="copy-json" type="button">Copy JSON</button>
-      <div id="ab" class="segmented" role="group" aria-label="Palette settings slots" title="Click the inactive half to save the current settings and load that slot">
-        <button type="button" class="seg active" data-slot="A" aria-pressed="true">A</button>
-        <button type="button" class="seg" data-slot="B" aria-pressed="false">B</button>
+      <div id="ab" class="segmented" role="group" aria-label="Palette settings slots">
+        <button type="button" class="seg active" data-slot="A" aria-pressed="true" title="Save the current settings into slot A and load it">A</button>
+        <button type="button" id="ab-copy" class="seg seg-copy" aria-label="Copy the active slot's settings into the other" title="Copy the active slot's settings into the other, without switching">→</button>
+        <button type="button" class="seg" data-slot="B" aria-pressed="false" title="Save the current settings into slot B and load it">B</button>
       </div>
-      <button id="ab-copy" type="button" title="Copy the active settings into the other slot, without switching">A → B</button>
       <button id="reset" type="button">Reset to defaults</button>
     </div>
   </header>

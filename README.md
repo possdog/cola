@@ -63,13 +63,14 @@ curl --cacert certs/localhost.crt https://127.0.0.1:8443/api/palette
 
 Click any swatch to copy its hex. The header buttons copy the whole palette
 as CSS custom properties (`--base-50: ...`) or JSON. **A/B** (next to the
-copy buttons) is a split A | B control for comparing two variants of the
-settings: click the inactive half to save the current settings into the
-active slot and load the other, so clicking back and forth flips between
-the two. **A → B / B → A** (the second button) copies the
-active slot's settings into the other without switching — useful for
-making both slots identical before diverging one, or for discarding the
-other variant. Slots are page-local — the server keeps persisting
+copy buttons) is a three-segment A | → | B control for comparing two
+variants of the settings: click the inactive half to save the current
+settings into the active slot and load the other, so clicking back and
+forth flips between the two. The middle arrow copies the active slot's
+settings into the other without switching; it points in the copy
+direction — useful for making both slots identical before diverging
+one, or for discarding the other variant. Slots are page-local — the
+server keeps persisting
 only the active palette — and switching to the still-empty slot seeds it
 with the current settings, so the first toggle changes nothing by itself.
 **Reset to defaults** restores the built-in palette (two clicks: the first

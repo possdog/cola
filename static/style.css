@@ -96,6 +96,10 @@ button.armed:hover {
 .segmented .seg:first-child { border-radius: calc(var(--radius) - 1px) 0 0 calc(var(--radius) - 1px); }
 .segmented .seg:last-child { border-radius: 0 calc(var(--radius) - 1px) calc(var(--radius) - 1px) 0; }
 .segmented .seg + .seg { border-left: 1px solid var(--border); }
+/* The middle arrow is an action, not a slot: it never takes the active
+   look (no data-slot, so setABButton skips it) and is a touch narrower
+   than the halves. */
+.segmented .seg-copy { padding: 7px 10px; }
 .segmented .seg:hover { color: var(--accent); }
 .segmented .seg.active {
   background: var(--bg-raised);
