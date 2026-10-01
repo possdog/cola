@@ -5,6 +5,7 @@ import { store } from "./store.js";
 import { $ } from "./util.js";
 import { renderGrid } from "./grid.js";
 import { renderWheel } from "./preview/wheel.js";
+import { renderGamut } from "./preview/gamut.js";
 import { renderCode } from "./preview/code.js";
 import { renderNotes } from "./preview/notes.js";
 import { renderBranding } from "./preview/branding.js";
@@ -12,6 +13,7 @@ import { renderBranding } from "./preview/branding.js";
 const TAB_PANES = {
   grid: "#grid-wrap",
   wheel: "#wheel-preview",
+  "3d": "#gamut-preview",
   code: "#code-preview",
   notes: "#notes-preview",
   branding: "#branding-preview",
@@ -23,6 +25,7 @@ function renderActive() {
   renderGrid();
   const { activeTab } = store;
   if (activeTab === "wheel") renderWheel();
+  else if (activeTab === "3d") renderGamut();
   else if (activeTab === "code") renderCode();
   else if (activeTab === "notes") renderNotes();
   else if (activeTab === "branding") renderBranding();

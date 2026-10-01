@@ -142,6 +142,20 @@ at the top, and only one filter can apply at a time.
   In both layouts the near-neutral base row — whose hue is unconstrained —
   appears as a legend ramp under the wheel instead of a wheel position.
   Click any swatch to copy its hex.
+- **3D** — an interactive plot of the palette in OKLCH space on a canvas
+  renderer (no libraries, no build step): angle is hue, radius is chroma,
+  and height is Oklab lightness, with level 50 at the top of the axis.
+  Every swatch is a dot, each chromatic row is traced by a path (the ramp's
+  characteristic rise-and-fall of chroma across levels), and the faint rings
+  are the per-level chroma envelope — the palette's own gamut outline, which
+  collapses toward the axis under the grayscale filter. The near-neutral
+  base row lands on the lightness axis, the spine the chromatic rows swing
+  around. Drag to rotate, scroll to zoom, double-click empty space to reset
+  the view; hover shows name-level and hex, and clicking a swatch copies its
+  hex. Like the wheel's layout mode, the camera is a display-only preference
+  that is never persisted. Geometry only, as everywhere in the UI: dots are
+  positioned from the l/c/h values the API already returns and painted with
+  the response hexes.
 - **Code** — a syntax-highlighted TypeScript sample shown in three programming
   environments, toggled at the top of the pane (a display-only preference,
   never persisted):
