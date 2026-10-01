@@ -26,18 +26,33 @@ function toast(msg) {
 }
 
 // Replace a preview pane's content without losing the user's place. The
-// panes are their own scroll containers, and a wholesale innerHTML swap
-// tears down the scrolled content, so the browser clamps scrollTop back
-// to 0 — a live palette edit would yank the visible region out of view.
-// Capturing the offsets before the swap and restoring them after keeps
-// the viewport anchored; assigning scrollTop re-clamps against the new
-// content, so a shorter render still lands on a valid position.
+// panes do not only scroll at the pane level: several previews scroll
+// inside nested mock regions instead (the Landing and Design page bodies,
+// the Notes editor and sidebar, the Code terminal/agent scrollbacks), and
+// a wholesale innerHTML swap tears down every one of those regions, so
+// each restarts at offset 0 and the visible region is yanked out of view.
+// The helper therefore snapshots scrollTop/scrollLeft of the pane and any
+// scrolled descendant before the swap and replays them onto the rebuilt
+// tree. Descendants are matched by document-order index, and only when
+// the old and new trees have the same element count: a render that
+// restructures the pane (a mode or scheme switch presenting a different
+// mock) resets instead, which is the honest behavior for a new layout.
+// Reassigning scrollTop re-clamps against the new content, so a shorter
+// render still lands on a valid position.
 function setPaneHTML(pane, html) {
-  const top = pane.scrollTop;
-  const left = pane.scrollLeft;
+  const oldAll = [pane, ...pane.querySelectorAll("*")];
+  const scrolled = [];
+  for (let i = 0; i < oldAll.length; i++) {
+    const el = oldAll[i];
+    if (el.scrollTop || el.scrollLeft) scrolled.push([i, el.scrollTop, el.scrollLeft]);
+  }
   pane.innerHTML = html;
-  pane.scrollTop = top;
-  pane.scrollLeft = left;
+  const newAll = [pane, ...pane.querySelectorAll("*")];
+  if (newAll.length !== oldAll.length) return;
+  for (const [i, top, left] of scrolled) {
+    newAll[i].scrollTop = top;
+    newAll[i].scrollLeft = left;
+  }
 }
 
 async function copyText(text, msg) {

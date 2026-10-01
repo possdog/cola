@@ -264,11 +264,13 @@ labels stay honest after a toggle.
 
 The previews re-render live from the palette being designed, so moving a
 slider restyles them exactly like the grid; they also honor the view filters
-(display-only, same as the grid). Each pane is its own scroll container and
-every re-render swaps its markup wholesale, so the render helpers in
-`static/js/util.js` (`setPaneHTML`) capture and restore the pane's scroll
-offsets around the swap — editing the palette never scrolls the preview out
-from under you.
+(display-only, same as the grid). Several panes scroll inside nested mock
+regions rather than at the pane itself (the Landing and Design page bodies,
+the Notes editor, the Code scrollbacks), and every re-render swaps the
+pane's markup wholesale — so the render helper in `static/js/util.js`
+(`setPaneHTML`) snapshots the scroll offsets of the pane and any scrolled
+descendant before the swap and replays them onto the rebuilt tree: editing
+the palette never scrolls the preview out from under you.
 
 **Dogfooding**: the app's own interface is themed from the palette being
 designed. Backgrounds, borders, and text come from the base ramp (950 through
