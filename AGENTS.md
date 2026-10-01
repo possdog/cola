@@ -43,9 +43,6 @@ static/js/                  ES modules: app.js (entry + wiring), store.js (share
 
 - All color math is server-side. The frontend never computes colors; it
   fetches `/api/palette` and renders. Keep it that way.
-- View filters (grayscale, CVD, blue light) are display-only: they affect
-  only the `filtered` response copy, never the real palette or exports, and
-  are never persisted.
 - Dogfooding: every API response carries a `theme` derived from the current
   palette; the UI is styled from it live. When changing response shapes,
   check `static/js/` consumers (swatch.js and the preview modules read the
@@ -54,6 +51,43 @@ static/js/                  ES modules: app.js (entry + wiring), store.js (share
   logic (see `persist.go`, `main.go` for the house style). Match it.
 - New handlers get tests in `handler_test.go`; test the JSON contract, not
   just Go values.
+
+## Behavior invariants
+
+Guarantees the UI and API currently make. Preserve them when touching the
+relevant code; `README.md` documents the user-facing behavior in depth.
+
+- Palette state and the A/B record are the only persisted things. Every
+  other preference (wheel layout, gamut camera and chroma scale, code
+  environment, per-pane light/dark face) is display-only: never persisted,
+  never posted. Blue-light intensity is posted per request but is not part
+  of the state.
+- View filters affect only the `filtered` response copy — never the real
+  palette, exports, or the persisted state. Multiple filters compose in a
+  fixed server-side order: CVD simulations, then grayscale, then blue light.
+  The UI sends at most one; the API accepts the array. When filters are
+  active, `theme` is derived from the `filtered` copy, not the real palette.
+- Every response carries `defaults` (the state `POST /api/reset` restores)
+  and `ab` (the A/B record), so single-slider reset and the slot UI work
+  client-side. A `POST`'s `activeSlot`/`slots` fields update the record;
+  requests without them keep the stored record. `POST /api/reset` must
+  never clobber the inactive slot: anything in its body besides `filters`,
+  `blueLight`, and `activeSlot` is ignored.
+- Per-color hue is clamped server-side to ±30° around each chromatic
+  color's ideal OKLCH center; the near-neutral base row is unconstrained.
+  Keep the clamp server-side.
+- `state.json` wraps state in an envelope (`state` + `ab`). A bare legacy
+  state object (files written before the A/B feature) still loads and
+  counts as slot A; a missing or corrupt file falls back to the default
+  palette.
+- Preview panes re-render by swapping their markup wholesale. Render
+  through `setPaneHTML` in `static/js/util.js`: it snapshots and replays
+  the scroll offsets of the pane and any scrolled descendant, so a
+  re-render never scrolls the preview out from under the user.
+- The light/dark toggle maps every level to its complement (50↔950, 500
+  fixed). Copy that names levels (pairing chips, legends, blurbs) must be
+  generated from the resolved levels, not the authored ones, so labels
+  stay correct after a toggle.
 
 ## Dangerous operations and boundaries
 

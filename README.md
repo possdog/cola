@@ -25,8 +25,7 @@ change, flushed on Ctrl-C, and loaded on the next start. The A/B comparison
 record (both slots and which one is active) is persisted in the same file,
 so neither variant is lost to a reload or restart. View filters are
 deliberately not persisted. A missing or corrupt state file falls back to
-the default palette; files written before the A/B feature (a bare state
-object) still load and count as slot A.
+the default palette.
 
 The server serves HTTPS by default. On first run it generates a self-signed
 certificate for `localhost`, `127.0.0.1`, and `::1` into `certs/` and reuses it
@@ -119,10 +118,7 @@ at the top, and only one filter can apply at a time.
 - **Blue light** — simulates a warm screen filter like f.lux or Night Shift:
   red passes through while green, and especially blue, are dimmed in linear
   RGB (at full intensity blue keeps 15%, green 80%). Paired with an intensity
-  slider that appears when the filter is on. The UI sends at most one filter,
-  but the API still accepts an array and composes multiple filters in a fixed
-  order: CVD simulations, then grayscale, then blue light (the blue light
-  filter is the last thing "in front of the screen").
+  slider that appears when the filter is on.
 
 **Preview tabs** (above the preview area):
 
@@ -160,9 +156,7 @@ at the top, and only one filter can apply at a time.
   around. Drag to rotate, scroll to zoom, double-click empty space to reset
   the view; hover shows name-level and hex, and clicking a swatch copies its
   hex. Like the wheel's layout mode, the camera is a display-only preference
-  that is never persisted. Geometry only, as everywhere in the UI: dots are
-  positioned from the l/c/h values the API already returns and painted with
-  the response hexes.
+  that is never persisted.
 - **Contrast** — a WCAG AA report on realistic foreground/background
   combinations, in two groups. *Interface pairings* are the combos a UI built
   on the palette actually makes: body, heading, secondary, and disabled text
@@ -174,7 +168,7 @@ at the top, and only one filter can apply at a time.
   assumes (body vs large text) and shows the contrast ratio plus a PASS/FAIL
   chip — 4.5:1 for body text, 3:1 for large text. The ratios are plain
   arithmetic on the server-provided WCAG luminance each swatch already
-  carries (no color math in the browser), and since the pane reads the
+  carries, and since the pane reads the
   filtered view, contrast can be re-checked under the grayscale, CVD, and
   blue-light filters. The PASS/FAIL chips themselves use the green and red
   ramps with luminance-picked ink, so the report scores the palette with the
@@ -258,19 +252,13 @@ levels) — so every authored pairing keeps its perceived-lightness gap
 with the faces swapped, which is exactly the guarantee the
 equal-lightness ramp exists to make. Defaults match each mock's native
 face (the code environments are dark, the other three light), and copy
-that names levels (the Notes pairing chips, the Landing legend, the
-Design section blurbs) is generated from the resolved levels so the
+that names levels is generated from the resolved levels so the
 labels stay honest after a toggle.
 
 The previews re-render live from the palette being designed, so moving a
 slider restyles them exactly like the grid; they also honor the view filters
-(display-only, same as the grid). Several panes scroll inside nested mock
-regions rather than at the pane itself (the Landing and Design page bodies,
-the Notes editor, the Code scrollbacks), and every re-render swaps the
-pane's markup wholesale — so the render helper in `static/js/util.js`
-(`setPaneHTML`) snapshots the scroll offsets of the pane and any scrolled
-descendant before the swap and replays them onto the rebuilt tree: editing
-the palette never scrolls the preview out from under you.
+(display-only, same as the grid). Re-rendering never scrolls a preview out
+from under you, even in panes that scroll inside nested mock regions.
 
 **Dogfooding**: the app's own interface is themed from the palette being
 designed. Backgrounds, borders, and text come from the base ramp (950 through
@@ -291,7 +279,9 @@ under blue light.
 - `POST /api/palette` — JSON state body plus optional `filters` array
   (`grayscale`, `protanopia`, `deuteranopia`, `tritanopia`, `bluelight`) and
   optional `blueLight` intensity in `[0,1]` (only applies while `bluelight`
-  is active; out-of-range values are clamped); returns the
+  is active; out-of-range values are clamped). Multiple filters compose in
+  a fixed order: CVD simulations, then grayscale, then blue light. Returns
+  the
   normalized state, the generated palette, and (when filters are active) a
   display-only `filtered` copy. Invalid bodies return `400`. The response's
   `theme` (the app UI's own colors) is derived from the filtered copy when
@@ -344,17 +334,5 @@ endpoints don't look oversaturated).
 }
 ```
 
-## Layout
-
-```
-main.go                    HTTP server; embeds static/
-internal/color/oklab.go    Oklab/OKLCH <-> sRGB, hex output, gamut fitting
-internal/palette/          State model and palette generation
-static/                    UI (no build step, no dependencies)
-static/js/                 UI logic as ES modules: app.js is the entry point
-                           (load + event wiring), store.js holds the shared
-                           mutable state, and each concern — grid, tabs,
-                           theme, controls, API calls, A/B slots, exports —
-                           has its own module, with one file per preview tab
-                           under static/js/preview/
-```
+Repository layout and conventions for working on the code live in
+[AGENTS.md](AGENTS.md).
