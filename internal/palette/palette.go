@@ -92,8 +92,9 @@ type State struct {
 	Pinch       float64 `json:"pinch"`
 	PinchCenter float64 `json:"pinchCenter"`
 	// TintHue, TintL, and TintChroma describe one OKLCH color that gets mixed
-	// into every swatch; TintIntensity is the mix fraction in [0,1] (0 keeps
-	// the untinted palette, 1 replaces every swatch with the tint). The
+	// into every swatch; TintIntensity is the mix fraction, clamped to
+	// [0,0.25] — beyond a quarter mix the palette stops reading as itself,
+	// so the silly end of the range stays out of reach. The
 	// first three only matter once the intensity departs from 0.
 	TintHue       float64 `json:"tintHue"`
 	TintL         float64 `json:"tintL"`
@@ -148,8 +149,8 @@ func DefaultState() State {
 		// (tint off) is load-bearing as the default, keeping the default
 		// palette exactly the untinted one.
 		TintHue:       30,
-		TintL:         0.55,
-		TintChroma:    0.12,
+		TintL:         0.5,
+		TintChroma:    0.15,
 		TintIntensity: 0,
 		Colors: []ColorSpec{
 			{Name: "base", Hue: 90, Chroma: 0.006},
@@ -188,7 +189,7 @@ func (s State) Normalized() State {
 	out.TintHue = clamp(s.TintHue, 0, 360)
 	out.TintL = clamp(s.TintL, 0.02, 0.995)
 	out.TintChroma = clamp(s.TintChroma, 0, 0.4)
-	out.TintIntensity = clamp(s.TintIntensity, 0, 1)
+	out.TintIntensity = clamp(s.TintIntensity, 0, 0.25)
 	// Copy the color slice before clamping in place: ColorSpec holds only
 	// scalars, so a slice copy is a full deep copy. Without it, the writes
 	// below would mutate the caller's backing array — and anything aliasing

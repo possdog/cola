@@ -82,9 +82,10 @@ curl --cacert certs/localhost.crt https://127.0.0.1:8443/api/palette
 - **Tint hue / luminosity / chroma / intensity** — mixes one fixed color
   into every swatch of the palette. The first three pick the tint in OKLCH
   (the same space as everything else; the default is a warm red at mid
-  lightness), and the intensity is the mix fraction from 0 (off — the
-  default, leaving the palette untouched) to 1 (every swatch becomes the
-  tint). The mix runs in Oklab, where a straight line between two colors is
+  lightness), and the intensity is the mix fraction: 0 is off (the default,
+  leaving the palette untouched), capped at 0.25 — beyond a quarter mix the
+  palette stops reading as itself, so the silly end stays out of reach. The
+  mix runs in Oklab, where a straight line between two colors is
   the perceptual gradient, and every swatch at a level starts from the same
   lightness, so the mixed lightness — pulled toward the tint's by the same
   fraction everywhere — is still identical across hues: tinting preserves
@@ -336,8 +337,8 @@ State shape:
   "pinch": 0,
   "pinchCenter": 0.5,
   "tintHue": 30,
-  "tintL": 0.55,
-  "tintChroma": 0.12,
+  "tintL": 0.5,
+  "tintChroma": 0.15,
   "tintIntensity": 0,
   "colors": [
     { "name": "base", "hue": 90, "chroma": 0.006 },
@@ -351,7 +352,7 @@ State shape:
 at peak lightness (chroma tapers toward the light/dark extremes so the
 endpoints don't look oversaturated). The `tint*` fields pick the tint color
 and its mix fraction: `tintHue` in `[0,360]`, `tintL` in `[0.02,0.995]`,
-`tintChroma` in `[0,0.4]`, and `tintIntensity` in `[0,1]`, all clamped
+`tintChroma` in `[0,0.4]`, and `tintIntensity` in `[0,0.25]`, all clamped
 server-side. A state written before the tint feature (the fields absent)
 loads with intensity 0, so the palette is unchanged.
 
@@ -359,7 +360,7 @@ loads with intensity 0, so the palette is unchanged.
 
 ```json
 {
-  "state": { "minL": 0.17, "maxL": 0.985, "saturation": 1, "bend": 0, "pinch": 0, "pinchCenter": 0.5, "tintHue": 30, "tintL": 0.55, "tintChroma": 0.12, "tintIntensity": 0, "colors": [] },
+  "state": { "minL": 0.17, "maxL": 0.985, "saturation": 1, "bend": 0, "pinch": 0, "pinchCenter": 0.5, "tintHue": 30, "tintL": 0.5, "tintChroma": 0.15, "tintIntensity": 0, "colors": [] },
   "ab": { "active": "A", "slots": { "A": { "…": "the state shape above" }, "B": null } }
 }
 ```

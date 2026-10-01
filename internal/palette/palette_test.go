@@ -142,7 +142,7 @@ func TestNormalizedClamps(t *testing.T) {
 	s.TintChroma = 9
 	s.TintIntensity = 9
 	n5 := s.Normalized()
-	if n5.TintHue != 0 || n5.TintL != 0.995 || n5.TintChroma != 0.4 || n5.TintIntensity != 1 {
+	if n5.TintHue != 0 || n5.TintL != 0.995 || n5.TintChroma != 0.4 || n5.TintIntensity != 0.25 {
 		t.Errorf("tint not clamped from above: hue %v L %v C %v k %v",
 			n5.TintHue, n5.TintL, n5.TintChroma, n5.TintIntensity)
 	}
@@ -292,10 +292,11 @@ func TestGenerateBend(t *testing.T) {
 }
 
 // TestGenerateTint checks the tint's contract through Generate: intensity 0
-// reproduces the untinted palette exactly no matter the tint color, intensity
-// 1 collapses every swatch onto the gamut-fitted tint itself, and an
-// intermediate intensity pulls every swatch's lightness to the mix point
-// while keeping each level's lightness equal across hues.
+// reproduces the untinted palette exactly no matter the tint color, the
+// maximum intensity pulls every swatch's lightness exactly to the mix point
+// with the tint while keeping each level's lightness equal across hues, and
+// the mixer's full-blend endpoint lands on the fitted tint (a fraction the
+// state's 0.25 clamp deliberately keeps out of reach).
 func TestGenerateTint(t *testing.T) {
 	plain := Generate(DefaultState())
 
@@ -306,45 +307,45 @@ func TestGenerateTint(t *testing.T) {
 		t.Error("tint intensity 0 changed the palette")
 	}
 
-	// Full intensity replaces every swatch with the fitted tint; the tint
-	// itself is gamut-fitted, so its hex is what a swatch must land on.
-	s.TintIntensity = 1
-	tinted := Generate(s)
-	wantHex := color.LCh{
-		L: s.TintL,
-		C: color.FitChroma(s.TintL, s.TintHue, s.TintChroma),
-		H: s.TintHue,
-	}.ToLab().Hex()
-	for _, row := range tinted.Colors {
-		for _, sw := range row.Swatches {
-			if sw.Hex != wantHex {
-				t.Errorf("%s level %d: full tint gave %s, want the tint %s",
-					row.Name, sw.Level, sw.Hex, wantHex)
-			}
-		}
-	}
-
-	// Half intensity: the mixed lightness sits exactly at the mix point of
+	// Max intensity: the mixed lightness sits exactly at the mix point of
 	// the level's base L and the tint's L (chroma fitting holds L fixed),
 	// and it is shared by every row at that level — the tint preserves the
 	// equal-perceived-lightness-per-level guarantee.
-	s.TintIntensity = 0.5
-	half := Generate(s)
+	const k = 0.25
+	s.TintIntensity = k
+	tinted := Generate(s)
 	for i, row := range plain.Colors {
 		for j, sw := range row.Swatches {
-			got := half.Colors[i].Swatches[j]
-			if want := (sw.L + s.TintL) / 2; math.Abs(got.L-want) > 1e-9 {
+			got := tinted.Colors[i].Swatches[j]
+			if want := sw.L + (s.TintL-sw.L)*k; math.Abs(got.L-want) > 1e-9 {
 				t.Errorf("%s level %d: tinted L %v, want the mix point %v",
 					row.Name, sw.Level, got.L, want)
 			}
 		}
 	}
 	for j := range plain.Levels {
-		for _, row := range half.Colors[1:] {
-			if row.Swatches[j].L != half.Colors[0].Swatches[j].L {
+		for _, row := range tinted.Colors[1:] {
+			if row.Swatches[j].L != tinted.Colors[0].Swatches[j].L {
 				t.Errorf("level %d: tint broke equal lightness across hues (%v vs %v)",
-					row.Swatches[j].Level, row.Swatches[j].L, half.Colors[0].Swatches[j].L)
+					row.Swatches[j].Level, row.Swatches[j].L, tinted.Colors[0].Swatches[j].L)
 			}
+		}
+	}
+
+	// The mixer itself is defined up to a full blend, so the collapse
+	// endpoint stays pinned here rather than through the state. A full
+	// blend is the tint alone, to float precision: the Oklab mix plus the
+	// OKLCH round trip and a second chroma fit are exact in theory but not
+	// bit-identical, hence the tolerance.
+	fitted := color.LCh{
+		L: s.TintL,
+		C: color.FitChroma(s.TintL, s.TintHue, s.TintChroma),
+		H: s.TintHue,
+	}
+	for _, tc := range []color.LCh{{L: 0.7, C: 0.1, H: 120}, {L: 0.2, C: 0.2, H: 30}} {
+		full := tintMix(tc, fitted.ToLab(), 1)
+		if math.Abs(full.L-fitted.L) > 1e-6 || math.Abs(full.C-fitted.C) > 1e-6 || math.Abs(full.H-fitted.H) > 1e-6 {
+			t.Errorf("tintMix(%v, k=1) = %v, want the fitted tint %v", tc, full, fitted)
 		}
 	}
 }
