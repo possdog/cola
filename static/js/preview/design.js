@@ -5,7 +5,7 @@
 // large solid grounds, oversized type, and hard geometric shapes.
 
 import { store } from "../store.js";
-import { $, esc } from "../util.js";
+import { $, esc, setPaneHTML } from "../util.js";
 import { hexOf } from "../swatch.js";
 import { hexFor, levelFor, schemeToggle } from "./scheme.js";
 
@@ -143,7 +143,7 @@ export function renderDesign() {
       <span class="design-spec-hex" style="color:${hex("base", 400)}">${hex(c.name, 600)}</span>
     </div>`).join("");
 
-  $("#design-preview").innerHTML = `
+  setPaneHTML($("#design-preview"), `
     <div class="preview-tools">${schemeToggle("design")}</div>
     <div class="design-page" style="background:${hex("base", 50)}">
       ${sec("Posters", "One poster per ramp: the 500 step as ground, oversized level-50 ink, a 200-step disc. Under the grayscale filter the disc must stay visibly lighter than its ground. The posters are finished art and render identically in both schemes.")}
@@ -158,5 +158,5 @@ export function renderDesign() {
       <div class="design-tiles">${tiles}</div>
       ${sec("Type specimen", `Display type per ramp on the ${lvl(50) === 50 ? "lightest" : "darkest"} ground: the ${lvl(300)}/${lvl(600)}/${lvl(900)} trio as weight classes that must hold without re-tuning.`)}
       <div class="design-specimen">${specimen}</div>
-    </div>`;
+    </div>`);
 }

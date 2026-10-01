@@ -2,7 +2,7 @@
 // a graphical editor, a terminal TUI, and a coding-agent chat TUI —
 // colored entirely from the palette through a scheme-bound hexOf lookup.
 
-import { $, esc } from "../util.js";
+import { $, esc, setPaneHTML } from "../util.js";
 import { hexFor, schemeToggle } from "./scheme.js";
 
 // Code preview modes, modeled on the three environments a palette ships in:
@@ -335,7 +335,7 @@ export function renderCode() {
     `<button type="button" class="code-mode-btn${codeMode === m ? " active" : ""}" aria-pressed="${codeMode === m}" data-mode="${m}">${label}</button>`;
   const body =
     codeMode === "terminal" ? renderCodeTerminal(hex) : codeMode === "agent" ? renderCodeAgent(hex) : renderCodeGraphical(hex);
-  $("#code-preview").innerHTML = `
+  setPaneHTML($("#code-preview"), `
     <div class="preview-tools">
       <div class="code-mode" role="group" aria-label="Code environment">
         ${btn("graphical", "Graphical")}${btn("terminal", "Terminal")}${btn("agent", "Agent")}
@@ -343,7 +343,7 @@ export function renderCode() {
       <span class="preview-tools-sep"></span>
       ${schemeToggle("code")}
     </div>
-    ${body}`;
+    ${body}`);
 }
 
 // Switch the code environment (Graphical / Terminal / Agent). Returns whether

@@ -25,6 +25,21 @@ function toast(msg) {
   toastTimer = setTimeout(() => (el.hidden = true), 1600);
 }
 
+// Replace a preview pane's content without losing the user's place. The
+// panes are their own scroll containers, and a wholesale innerHTML swap
+// tears down the scrolled content, so the browser clamps scrollTop back
+// to 0 — a live palette edit would yank the visible region out of view.
+// Capturing the offsets before the swap and restoring them after keeps
+// the viewport anchored; assigning scrollTop re-clamps against the new
+// content, so a shorter render still lands on a valid position.
+function setPaneHTML(pane, html) {
+  const top = pane.scrollTop;
+  const left = pane.scrollLeft;
+  pane.innerHTML = html;
+  pane.scrollTop = top;
+  pane.scrollLeft = left;
+}
+
 async function copyText(text, msg) {
   try {
     await navigator.clipboard.writeText(text);
@@ -34,4 +49,4 @@ async function copyText(text, msg) {
   }
 }
 
-export { $, fetchJSON, fmt, esc, toast, copyText };
+export { $, fetchJSON, fmt, esc, toast, copyText, setPaneHTML };

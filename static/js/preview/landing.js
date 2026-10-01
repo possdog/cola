@@ -2,7 +2,7 @@
 // every ramp, plus one closing dark CTA band.
 
 import { store } from "../store.js";
-import { $, esc } from "../util.js";
+import { $, esc, setPaneHTML } from "../util.js";
 import { hexFor, levelFor, schemeToggle } from "./scheme.js";
 
 // Width mixes for the usage chart's stacked bars. A handful of fixed ratios
@@ -155,7 +155,7 @@ export function renderLanding() {
       <span class="brand-btn-ghost" style="border-color:${hex("base", 400)};color:${hex("base", 800)}">Choose Agency</span>
     </div>`;
 
-  $("#landing-preview").innerHTML = `
+  setPaneHTML($("#landing-preview"), `
     <div class="preview-tools">${schemeToggle("landing")}</div>
     <div class="brand-page" style="background:${hex("base", 50)}">
       <nav class="brand-nav">
@@ -199,5 +199,5 @@ export function renderLanding() {
         </div>
       </div>
       <p class="brand-foot" style="color:${hex("base", 400)}">Kroma Labs — built on Oklab.</p>
-    </div>`;
+    </div>`);
 }

@@ -6,7 +6,7 @@
 // (grayscale, CVD, and blue light all change luminance relationships).
 
 import { store } from "../store.js";
-import { $, esc } from "../util.js";
+import { $, esc, setPaneHTML } from "../util.js";
 import { swatchText } from "../swatch.js";
 
 // AA thresholds. "large" is WCAG's large-text class (>=24px, or >=18.66px
@@ -104,7 +104,7 @@ export function renderContrast() {
     .map((p) => card(p.fg, p.bg, p))
     .join("");
 
-  $("#contrast-preview").innerHTML = `
+  setPaneHTML($("#contrast-preview"), `
     <div class="contrast-wrap">
       <div class="contrast-sec">
         <h3>Interface pairings</h3>
@@ -116,5 +116,5 @@ export function renderContrast() {
         <p>The two standard pairs every chromatic ramp must support: level-800 ink on its level-100 tint, and the 400 step on base-950.</p>
         <div class="contrast-grid">${perRamp}</div>
       </div>
-    </div>`;
+    </div>`);
 }

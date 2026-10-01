@@ -4,7 +4,7 @@
 // so the app never renders as a mixed light/dark split.
 
 import { store } from "../store.js";
-import { $, esc } from "../util.js";
+import { $, esc, setPaneHTML } from "../util.js";
 import { hexFor, levelFor, schemeToggle } from "./scheme.js";
 
 // Tag pills cycle through several chromatic rows: a pill's ground is the
@@ -55,7 +55,7 @@ export function renderNotes() {
     })
     .join("");
 
-  $("#notes-preview").innerHTML = `
+  setPaneHTML($("#notes-preview"), `
     <div class="preview-tools">${schemeToggle("notes")}</div>
     <div class="notes-app">
       <aside class="notes-side" style="background:${hex("base", 100)}">
@@ -99,5 +99,5 @@ export function renderNotes() {
           <span class="notes-bl" style="background:${hex("base", 100)};color:${hex("blue", 700)}">Flexoki teardown</span>
         </div>
       </div>
-    </div>`;
+    </div>`);
 }

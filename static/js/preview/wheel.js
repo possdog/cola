@@ -3,7 +3,7 @@
 // already returns (the same ones the grid tooltips use).
 
 import { store } from "../store.js";
-import { $, esc } from "../util.js";
+import { $, esc, setPaneHTML } from "../util.js";
 import { titleFor } from "../swatch.js";
 
 // Wheel layout mode: "hue" plots each swatch at its actual OKLCH hue angle;
@@ -140,14 +140,14 @@ export function renderWheel() {
   const mode = wheelMode === "fixed" ? renderWheelFixed(pairs, n) : renderWheelHue(pairs, n);
   const btn = (m, label) =>
     `<button type="button" class="wheel-mode-btn${wheelMode === m ? " active" : ""}" aria-pressed="${wheelMode === m}" data-mode="${m}">${label}</button>`;
-  $("#wheel-preview").innerHTML = `
+  setPaneHTML($("#wheel-preview"), `
     <div class="wheel-mode" role="group" aria-label="Wheel layout">
       ${btn("hue", "By hue")}${btn("fixed", "Fixed")}
     </div>
     <svg class="wheel-svg" viewBox="-60 -20 1120 1040" role="img" aria-label="Palette color wheel">
       ${mode.svg}
     </svg>
-    ${mode.below}`;
+    ${mode.below}`);
 }
 
 // Switch the wheel layout (By hue / Fixed). Returns whether the mode
