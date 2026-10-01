@@ -628,12 +628,14 @@ const cloneState = (s) => JSON.parse(JSON.stringify(s));
 
 function setABButton() {
   // The segmented control marks the active half; the copy button's label
-  // shows the copy direction.
-  for (const slot of ["A", "B"]) {
-    const seg = $(`#ab-${slot.toLowerCase()}`);
-    seg.classList.toggle("active", abActive === slot);
-    seg.setAttribute("aria-pressed", abActive === slot);
-  }
+  // shows the copy direction. Halves are found by their data-slot, the same
+  // attribute the click handler keys on, so markup and JS share one source
+  // of truth.
+  document.querySelectorAll("#ab .seg").forEach((seg) => {
+    const on = seg.dataset.slot === abActive;
+    seg.classList.toggle("active", on);
+    seg.setAttribute("aria-pressed", on);
+  });
   $("#ab-copy").textContent = `${abActive} → ${abActive === "A" ? "B" : "A"}`;
 }
 
