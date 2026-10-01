@@ -78,15 +78,23 @@ button.armed:hover {
   border: 1px solid var(--border);
   border-radius: 999px;
   overflow: hidden;
+  /* Fills the subpixel sliver the halves' rounded ends can leave against
+     the container's border; matches the inactive half's fill. */
+  background: var(--bg-panel);
 }
 .segmented .seg {
   background: var(--bg-panel);
   color: var(--text-dim);
   border: none;
-  border-radius: 0;
   padding: 7px 14px;
   font-size: 13px;
 }
+/* Each half rounds only its outer end, so the active half's raised fill and
+   inset ring follow the pill's curve; a square half ends in the clipped
+   corners seen before. The halves' radius lands concentric with the
+   container's border (999px clamps to half of each element's height). */
+.segmented .seg:first-child { border-radius: 999px 0 0 999px; }
+.segmented .seg:last-child { border-radius: 0 999px 999px 0; }
 .segmented .seg + .seg { border-left: 1px solid var(--border); }
 .segmented .seg:hover { color: var(--accent); }
 .segmented .seg.active {
