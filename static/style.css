@@ -508,6 +508,23 @@ input[type="range"]::-moz-range-thumb {
   padding: 14px 10px;
   overflow: auto;
 }
+/* Search field is a mock, not an input: the preview is read-only, and a div
+   avoids shipping a focusable control that does nothing. */
+.notes-search {
+  font-size: 12px;
+  padding: 6px 9px;
+  border-radius: 6px;
+  border: 1px solid;
+  margin-bottom: 12px;
+}
+.notes-new {
+  margin-top: 16px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
 .notes-side-head { font-weight: 600; font-size: 13px; margin-bottom: 10px; }
 .notes-group {
   font-size: 10.5px;
@@ -580,6 +597,51 @@ input[type="range"]::-moz-range-thumb {
   border-radius: 0 6px 6px 0;
   font-size: 13.5px;
 }
+.notes-editor code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+.notes-editor mark {
+  padding: 1px 3px;
+  border-radius: 3px;
+}
+/* Per-color pairing chips: the card's own background comes from inline
+   styles, so each card demos its row's real pairing, not a theme variable. */
+.pairs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(235px, 1fr));
+  gap: 10px 14px;
+  margin: 8px 0 2px;
+}
+.pair { display: flex; flex-direction: column; gap: 4px; }
+.pair-name {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.pair-chip { font-size: 12px; padding: 6px 9px; border-radius: 5px; }
+.notes-callout {
+  margin: 14px 0 0;
+  padding: 8px 14px;
+  border-left: 3px solid;
+  border-radius: 0 6px 6px 0;
+  font-size: 13px;
+}
+.notes-callout p { margin: 3px 0 0; font-size: 13px; }
+.notes-callout-title { display: block; font-weight: 600; font-size: 13px; }
+.notes-backlinks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid;
+  font-size: 12px;
+}
+.notes-bl { font-size: 12px; padding: 2px 9px; border-radius: 999px; }
 
 /* Landing page (Branding tab) */
 #branding-preview { display: flex; flex-direction: column; }

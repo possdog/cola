@@ -121,8 +121,12 @@ at the top, and only one filter can apply at a time.
   classes map to palette rows (keywords red-400, types cyan-400, functions
   blue-400, strings green-400, numbers orange-400, properties yellow-300,
   comments base-500) on a base-950 editor background.
-- **Notes** — an Obsidian-style note app: dark file sidebar, light editor,
-  tag pills, wikilinks, and a checklist.
+- **Notes** — an Obsidian-style note app: dark file sidebar with a search
+  field and a cyan "New note" button, light editor, tag pills in several
+  hues, inline code and highlight spans, a checklist, an orange callout,
+  wikilinks, and blue backlinks. A "Pairings" section renders one card per
+  chromatic row showing its two standard pairings — level-800 ink on the
+  row's level-100 ground, and its 400 step on base-950 (dark mode).
 - **Branding** — a landing page for a fictional company ("Kroma"), covering
   the light end of the ramps: nav, hero, a strip of the live cyan ramp, and
   feature cards.
