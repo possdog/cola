@@ -80,7 +80,9 @@ function buildColorControls() {
     const [hueVal, chromaVal] = row.querySelectorAll(".val");
     hueIn.addEventListener("input", () => {
       c.hue = Number(hueIn.value);
-      hueVal.textContent = `${hueIn.value}°`;
+      // Round like the initial label does, so a fractional posted hue (direct
+      // API state) doesn't read differently once the thumb moves.
+      hueVal.textContent = `${Math.round(c.hue)}°`;
       update();
     });
     // Double-click snaps the hue to its default, the same value Reset to

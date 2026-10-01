@@ -47,7 +47,7 @@ const CODE_SAMPLE = [
   [["p", "  "], ["kw", "return"], ["p", " `"], ["tpl", "${name}"], ["p", "-800 on "], ["tpl", "${name}"], ["p", "-100`;"]],
   [["p", "}"]],
   [],
-  [["kw", "export"], ["p", " "], ["kw", "const"], ["p", " "], ["decl", "PAIRINGS"], ["p", " ["], ["str", '"pairing"'], ["p", ", "], ["str", '"oklch"'], ["p", ", "], ["str", '"flexoki"'], ["p", "];"]],
+  [["kw", "export"], ["p", " "], ["kw", "const"], ["p", " "], ["decl", "PAIRINGS"], ["p", " = ["], ["str", '"pairing"'], ["p", ", "], ["str", '"oklch"'], ["p", ", "], ["str", '"flexoki"'], ["p", "];"]],
 ];
 
 // Token colors, shared by all three environments: a keyword is red-400 in a
