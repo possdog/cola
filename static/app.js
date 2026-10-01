@@ -343,7 +343,9 @@ function renderWheelFixed(pairs, n) {
   // dots, which sit on n rings with the innermost at rIn.
   const step = (WHEEL.rOut - WHEEL.rIn) / n;
   const bandGap = 1.5; // radial hairline between level bands
-  const sectorGap = 1; // angular hairline between rows
+  // Angular hairline between rows, ~3px at the rim — the same separation as
+  // the grid's cell gap — tapering to a hairline toward the center.
+  const sectorGap = 0.4;
   const sector = 360 / pairs.length;
   const bands = [];
   const names = [];
