@@ -149,14 +149,15 @@ main {
 }
 .slider-group:last-child { margin-bottom: 2px; }
 
-/* Hairline separating the Global panel's sub-sections (base sliders, tint,
-   level distribution). Two things set it apart from the slider tracks at a
-   glance: it bleeds to the panel's edges — the -14px side margins cancel
-   .panel's padding, so the two must stay in sync — making it wider than
-   every inset track, and it floats with generous, symmetric clearance
-   (~32px total on each side: the slider-group above contributes its 12px
-   bottom margin) against the panel's normal 12px rhythm. */
-.panel hr.divider {
+/* The one divider style, shared by the Global panel's sub-sections and the
+   Colors panel's rows (real <hr class="divider"> elements in both). Two
+   things set it apart from the slider tracks at a glance: it bleeds to the
+   panel's edges — the -14px side margins cancel .panel's padding, so the
+   two must stay in sync — making it wider than every inset track, and it
+   floats with generous, symmetric clearance (~32px total on each side:
+   the element above — a slider-group or a color-row — contributes its
+   12px bottom margin) against the panels' normal 12px rhythm. */
+.divider {
   border: none;
   border-top: 1px solid var(--border);
   margin: 20px -14px 32px;
@@ -242,11 +243,15 @@ input[type="range"]::-moz-range-thumb {
 .filter-slider { margin: 0 0 10px 22px; }
 .filter-slider .slider-group { margin-bottom: 0; }
 
+/* Color rows are separated by the shared .divider rule (see above), so
+   they carry no border of their own; like slider-groups they end with a
+   12px bottom margin so the divider below floats with the same symmetric
+   clearance as in the Global panel. */
 .color-row {
-  padding: 10px 0;
-  border-top: 1px solid var(--border);
+  padding: 0;
+  margin-bottom: 12px;
 }
-.color-row:first-child { border-top: none; padding-top: 0; }
+.color-row:last-child { margin-bottom: 0; }
 .color-row .color-name {
   font-size: 13px;
   font-weight: 600;

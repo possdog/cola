@@ -113,6 +113,14 @@ function buildColorControls() {
       update();
     });
     colorDots.set(c.name, row.querySelector(".color-dot"));
+    // The same divider style as the Global panel's sub-sections (a single
+    // .divider rule in style.css), so both sidebars separate their groups
+    // identically; every row after the first gets one before it.
+    if (i > 0) {
+      const divider = document.createElement("hr");
+      divider.className = "divider";
+      wrap.appendChild(divider);
+    }
     wrap.appendChild(row);
   });
 }
