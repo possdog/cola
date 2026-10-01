@@ -21,7 +21,7 @@
 //   preference: it rides along with every request but is never part of the
 //   exported palette state.
 // - activeTab is the active preview tab (grid / wheel / gamut / code / notes /
-//   branding). Grid is the default.
+//   landing / design). Grid is the default.
 // - abActive / abSlots are the A/B comparison record (see ab.js).
 
 export const store = {

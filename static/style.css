@@ -361,7 +361,7 @@ input[type="range"]::-moz-range-thumb {
   margin: 10px 2px 0;
 }
 
-/* ---- preview panes (Wheel / Code / Notes / Branding) --------------------- */
+/* ---- preview panes (Wheel / Code / Notes / Landing) --------------------- */
 /* These mock app UIs are pure demo surfaces: app.js rebuilds their innerHTML
    with inline palette colors on every update, so structure lives in JS and
    only layout/typography lives here. */
@@ -917,8 +917,8 @@ input[type="range"]::-moz-range-thumb {
 }
 .notes-bl { font-size: 12px; padding: 2px 9px; border-radius: 999px; }
 
-/* Landing page (Branding tab) */
-#branding-preview { display: flex; flex-direction: column; }
+/* Landing page (Landing tab) */
+#landing-preview { display: flex; flex-direction: column; }
 
 .brand-page {
   flex: 1;
@@ -1135,6 +1135,246 @@ input[type="range"]::-moz-range-thumb {
 }
 .brand-dark h3 { margin: 0 0 8px; font-size: 22px; }
 .brand-dark p { margin: 0 0 18px; font-size: 13.5px; }
+
+/* Graphic design scenarios (Design tab) */
+#design-preview { display: flex; flex-direction: column; }
+
+.design-page {
+  flex: 1;
+  border-radius: var(--radius);
+  overflow: auto;
+  padding: 0 36px 28px;
+}
+
+.design-sec { margin: 34px 0 14px; }
+.design-sec h3 { margin: 0 0 4px; font-size: 15px; letter-spacing: -0.2px; }
+.design-sec p { margin: 0; font-size: 12.5px; }
+
+/* Posters: fixed aspect ratio so the series reads as a set; the ground and
+   every shape inside is painted inline per ramp. */
+.design-posters {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 14px;
+}
+.design-poster {
+  margin: 0;
+  aspect-ratio: 3 / 4;
+  border-radius: 10px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 14px;
+  overflow: hidden;
+}
+.design-poster-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+/* The geometric accent: oversized and bleeding off the poster's edge, the
+   Swiss-poster convention. Sits behind the wordmark. */
+.design-poster-disc {
+  position: absolute;
+  width: 130%;
+  padding-bottom: 130%;
+  border-radius: 50%;
+  right: -55%;
+  bottom: 18%;
+}
+.design-poster-word {
+  position: relative;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 0.95;
+  overflow-wrap: anywhere;
+}
+
+/* Editorial: two page mock side by side, page proportions kept by aspect. */
+.design-mag {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 14px;
+}
+.design-mag-page {
+  border-radius: 10px;
+  padding: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.design-kicker {
+  margin: 0;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+.design-mag-head {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.1;
+  letter-spacing: -0.6px;
+}
+.design-mag-cols {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 16px;
+}
+.design-mag-lede { margin: 0; font-size: 12.5px; line-height: 1.6; }
+.design-dropcap {
+  float: left;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 15px;
+  margin: 3px 8px 0 0;
+}
+.design-mag-text { display: grid; gap: 6px; }
+/* Body copy as tinted bars: heights vary so a "paragraph" reads as lines. */
+.design-mag-text span {
+  height: 5px;
+  border-radius: 3px;
+}
+.design-mag-text span:nth-child(3n) { width: 88%; }
+.design-mag-text span:nth-child(4n) { width: 94%; }
+.design-mag-text span:last-child { width: 62%; }
+.design-pull {
+  margin: 4px 0 0;
+  padding: 4px 0 4px 14px;
+  border-left: 3px solid;
+  border-radius: 0 6px 6px 0;
+}
+.design-pull p { margin: 0; font-size: 14px; font-weight: 600; line-height: 1.45; }
+.design-mag-foot {
+  margin-top: auto;
+  padding-top: 12px;
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+/* "Photo" plate: an abstract composition standing in for a full-bleed image. */
+.design-mag-photo {
+  aspect-ratio: 4 / 3;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  display: block;
+}
+.design-mag-shape {
+  position: absolute;
+  width: 55%;
+  padding-bottom: 55%;
+  border-radius: 50%;
+  right: 8%;
+  bottom: 10%;
+}
+.design-mag-shape2 {
+  width: 38%;
+  padding-bottom: 38%;
+  border-radius: 0 50% 50% 50%;
+  left: 10%;
+  top: 12%;
+}
+
+/* Album art: square covers, gradient grounds painted inline per ramp. */
+.design-covers {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 14px;
+}
+.design-cover {
+  margin: 0;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 14px;
+}
+.design-cover-title { font-size: 15px; font-weight: 700; }
+.design-cover-artist { font-size: 10.5px; text-transform: uppercase; letter-spacing: 1.2px; }
+
+/* Pattern tiles: square tiles, shapes positioned per the tile's edges. */
+.design-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 14px;
+}
+.design-tile {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.design-tile-disc {
+  position: absolute;
+  width: 52%;
+  padding-bottom: 52%;
+  border-radius: 50%;
+  left: 12%;
+  top: 12%;
+}
+.design-tile-half {
+  position: absolute;
+  width: 60%;
+  padding-bottom: 30%;
+  border-radius: 999px 999px 0 0;
+  right: -8%;
+  bottom: 0;
+}
+.design-tile-quarter {
+  position: absolute;
+  width: 34%;
+  padding-bottom: 34%;
+  border-radius: 100% 0 0 0;
+  right: 10%;
+  top: 14%;
+}
+.design-tile-bars {
+  position: absolute;
+  left: 12%;
+  bottom: 14%;
+  width: 46%;
+  display: grid;
+  gap: 4px;
+}
+.design-tile-bars span { height: 6px; border-radius: 3px; }
+
+/* Type specimen: one row per ramp, display glyphs left, metadata right. */
+.design-specimen { display: grid; gap: 10px; }
+.design-spec-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  border: 1px solid;
+  border-radius: 10px;
+  padding: 10px 18px;
+}
+.design-spec-aa {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  width: 64px;
+  flex: none;
+}
+.design-spec-meta { display: grid; gap: 3px; font-size: 12.5px; flex: 1; }
+.design-spec-meta span:nth-child(2) { font-weight: 600; }
+.design-spec-meta span:nth-child(3) { font-weight: 800; }
+.design-spec-hex {
+  font-size: 11px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.5px;
+}
 
 #toast {
   position: fixed;

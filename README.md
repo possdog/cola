@@ -193,7 +193,7 @@ at the top, and only one filter can apply at a time.
   wikilinks, and blue backlinks. A "Pairings" section renders one card per
   chromatic row showing its two standard pairings — level-800 ink on the
   row's level-100 ground, and its 400 step on base-950 (dark mode).
-- **Branding** — a landing page for a fictional company ("Kroma") that walks
+- **Landing** — a landing page for a fictional company ("Kroma") that walks
   the ramps through every register a brand needs: nav, hero, a strip of the
   live cyan ramp, and feature cards on the light end; logo marks for every
   chromatic ramp (the 600 step solid, the 100 step tinted, ink from the
@@ -203,6 +203,19 @@ at the top, and only one filter can apply at a time.
   the 300/500/700 steps per ramp (a grayscale check: the three segments
   must stay three distinct grays); pricing cards with one inverted
   chromatic block; and a dark CTA band on base-950 covering the dark end.
+- **Design** — the palette dropped into contemporary graphic-design
+  scenarios, exercising the ramps as flat compositions rather than UI
+  registers: a Swiss-style poster series (one per ramp, the 500 step as
+  ground with oversized level-50 ink and a 200-step disc bleeding off the
+  edge — a grayscale check, since the disc must stay lighter than its
+  ground); a magazine spread on the light end of base (red kicker, cyan
+  drop cap and pull quote, body copy drawn as tinted bars, and an abstract
+  full-bleed "photo" plate on the facing page); gradient album art per
+  ramp (the 400-to-800 span blended by CSS, so the preview shows the
+  sRGB interpolation a designer would actually ship); geometric pattern
+  tiles (disc, half disc, quarter, and bars from the 300/600/800 trio on
+  a 100 ground); and a type specimen where each ramp's 300/600/900 steps
+  play display-type weight classes on the lightest ground.
 
 The previews re-render live from the palette being designed, so moving a
 slider restyles them exactly like the grid; they also honor the view filters

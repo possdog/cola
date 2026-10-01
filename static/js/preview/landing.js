@@ -1,4 +1,4 @@
-// Branding preview tab: a landing-page mock exercising the light end of
+// Landing preview tab: a landing-page mock exercising the light end of
 // every ramp, plus one closing dark CTA band.
 
 import { store } from "../store.js";
@@ -16,7 +16,7 @@ const BRAND_MIXES = [
   [34, 41, 25],
 ];
 
-export function renderBranding() {
+export function renderLanding() {
   // The light end of the ramps gets most of the work here — the app's own
   // chrome already demos the dark end — plus one closing dark CTA band, so
   // the page covers both faces of every ramp. Per-row sections iterate the
@@ -133,7 +133,7 @@ export function renderBranding() {
       <span class="brand-btn-ghost" style="border-color:${hexOf("base", 400)};color:${hexOf("base", 800)}">Choose Agency</span>
     </div>`;
 
-  $("#branding-preview").innerHTML = `
+  $("#landing-preview").innerHTML = `
     <div class="brand-page" style="background:${hexOf("base", 50)}">
       <nav class="brand-nav">
         <span class="brand-mark" style="background:${hexOf("cyan", 500)};color:${hexOf("base", 50)}">K</span>
